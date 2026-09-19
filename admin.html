@@ -13,17 +13,19 @@ label{font-size:12px;color:#ad9685}.muted{color:#9d8877;font-size:13px}
 </style>
 </head>
 <body><div class="wrap">
-<div class="card"><h1>Admin Dashboard — Demo</h1><p class="muted">This is a frontend demo. Connect it to a secure backend before production.</p></div>
+<div class="card"><h1>Admin Dashboard — Demo</h1><p class="muted">Add an authorised direct audio URL here. The player uses HTML5 audio; YouTube IDs are metadata only.</p></div>
 <div class="card"><h2>Add / Edit Song</h2>
 <div class="row">
 <label>Song title<input id="title" placeholder="Mayabini"></label>
 <label>Artist<input value="Zubeen Garg"></label>
 <label>Album<input placeholder="Album name"></label>
 <label>Year<input placeholder="2026"></label>
-<label>YouTube Video ID<input id="yt" placeholder="Example: dQw4w9WgXcQ"></label>
+<label>Authorised Audio URL<input id="audio" placeholder="https://your-domain.example/song.mp3"></label>
+<label>YouTube Video ID (metadata only)<input id="yt" placeholder="Optional video ID"></label>
 <label>Category<select><option>Song</option><option>Radio</option><option>Playlist</option></select></label>
 </div>
 <button onclick="saveSong()">Save Song</button>
+<button onclick="clearSongs()" style="margin-left:8px;background:#5a3524;color:#fff">Reset Catalog</button>
 <p id="msg" class="muted"></p>
 </div>
 <div class="card"><h2>Production checklist</h2>
@@ -31,6 +33,16 @@ label{font-size:12px;color:#ad9685}.muted{color:#9d8877;font-size:13px}
 </div>
 </div>
 <script>
-function saveSong(){const t=document.getElementById('title').value.trim();const y=document.getElementById('yt').value.trim();document.getElementById('msg').textContent=t?`Saved demo record: ${t}${y?' (YouTube ID added)':''}`:'Enter a song title.'}
+function saveSong(){
+const t=document.getElementById('title').value.trim();
+const a=document.getElementById('audio').value.trim();
+const y=document.getElementById('yt').value.trim();
+if(!t){document.getElementById('msg').textContent='Enter a song title.';return;}
+let songs=[];try{songs=JSON.parse(localStorage.getItem('zubeen_songs'))||[]}catch{}
+const item={id:Date.now(),title:t,artist:'Zubeen Garg',album:document.querySelectorAll('input')[2].value.trim()||'Zubeen Collection',year:document.querySelectorAll('input')[3].value.trim()||'—',audioUrl:a,youtubeId:y,duration:'—'};
+songs.push(item);localStorage.setItem('zubeen_songs',JSON.stringify(songs));
+document.getElementById('msg').textContent=a?'Song saved. Reload the player page to use it.':'Song saved, but add an authorised Audio URL before it can play.';
+}
+function clearSongs(){localStorage.removeItem('zubeen_songs');document.getElementById('msg').textContent='Catalog reset. Reload the player page.';}
 </script>
 </body></html>

@@ -1,16 +1,32 @@
-# Zubeen Player — Real YouTube Player
+# Zubeen Player — Radio + Song Player
 
-## Render
-- Build Command: `npm install && npm run build`
-- Start Command: `npm start`
-- Environment Variable: `YOUTUBE_API_KEY` = your Google Cloud YouTube Data API v3 key
+This version is an audio-first player. It does **not** use a YouTube video iframe for playback.
 
-Never put the real API key in GitHub or frontend code.
+## Features
+- HTML5 audio playback
+- Play / pause / previous / next
+- Progress seeking and volume
+- Auto Radio: automatically advances when a song ends
+- Queue takes priority over the normal song list
+- Queue loop through the catalog
+- Favorites
+- Mobile responsive UI
+- No YouTube video screen
 
-## How playback works
-1. Search calls `/api/youtube/search` on the Render server.
-2. The server uses the secret `YOUTUBE_API_KEY` with YouTube Data API v3.
-3. Only public, embeddable videos are returned.
-4. Clicking Play creates an official YouTube iframe with autoplay.
+## Add real authorised audio
+Open `src/main.jsx` and put an authorised direct audio URL in each song's `audioUrl` field:
 
-If a specific video does not allow embedding, it will not be returned by search.
+```js
+{ id: 1, title: "Mayabini", artist: "Zubeen Garg", audioUrl: "https://your-domain.example/audio/mayabini.mp3" }
+```
+
+The URL must point to audio that the browser can stream (for example MP3/AAC/HLS, depending on your server setup) and that you are authorised to distribute/play.
+
+## Important about YouTube API
+YouTube Data API can discover public video metadata, but it does not provide a direct MP3/audio-stream URL. This app therefore does not convert YouTube videos into audio. If YouTube is used for discovery, keep it as metadata and use an approved playback method separately.
+
+## Run
+```bash
+npm install
+npm run dev
+```
