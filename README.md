@@ -1,58 +1,39 @@
-# Zubeen Player
+# Zubeen Player — Real YouTube Search Backend
 
-A simple mobile-first Zubeen music-player starter project.
+This version adds a small Express backend so the YouTube Data API key stays server-side.
 
-## Included
-
-- Song search/list
-- Play / pause UI
-- Previous / next
-- Favourite
-- Queue
-- Auto Radio toggle
-- Add Online Link UI
-- YouTube embedded-player support when an authorised `youtubeId` is supplied
-- Admin dashboard demo
-- Responsive design
-
-## Run
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open the local Vite URL.
+For a production-style local test:
 
-## Add a YouTube video
-
-In `src/main.jsx`, set an authorised/embeddable video's ID:
-
-```js
-{ id: 1, title: "Example", youtubeId: "VIDEO_ID", ... }
+```bash
+npm run build
+YOUTUBE_API_KEY=your_key npm start
 ```
 
-Do not download or re-host YouTube audio as MP3. For production, use an approved YouTube player/integration and follow YouTube policies.
+## Render
 
-## Production architecture
+Use a Node service with:
 
-Frontend -> Backend API -> PostgreSQL
-                       |
-                       +-> YouTube Data API (metadata/discovery)
-                       |
-                       +-> Admin authentication
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm start`
+- **Environment Variable:** `YOUTUBE_API_KEY` = your Google Cloud YouTube Data API v3 key
 
-Keep API keys and database credentials on the server. Do not put secrets in the frontend.
+Do not put the key in `src/main.jsx` or any `VITE_*` variable.
+
+## API
+
+`GET /api/health` checks server status without exposing the key.
+
+`GET /api/youtube/search?q=Zubeen%20Garg&maxResults=12` searches YouTube through the backend. The backend requests `type=video` and `videoEmbeddable=true` and returns title, thumbnail, channel and video ID.
+
+The search endpoint uses the YouTube Data API's quota. Search requests consume quota, so production should add caching/rate limiting before heavy traffic.
 
 ## Important
 
-This ZIP is an MVP starter, not a finished commercial service. A production release should add:
-- secure admin login
-- PostgreSQL
-- backend API
-- YouTube Data API integration with quota-aware caching
-- proper PWA manifest/service worker
-- analytics/monitoring
-- rate limiting
-- authorised music/content sources
-- backup strategy
+`videoEmbeddable=true` means YouTube reports the video as embeddable; it does **not** by itself prove music licensing/permission. Only use videos/content that you are authorised to use. Playback stays inside YouTube's official iframe player.
