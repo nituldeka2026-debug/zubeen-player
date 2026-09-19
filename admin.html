@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zubeen Player — Admin Demo</title>
+<style>
+body{margin:0;background:#120d09;color:#f7eee7;font-family:system-ui;padding:30px}
+.wrap{max-width:900px;margin:auto}.card{background:#251911;border:1px solid #4a3324;border-radius:18px;padding:22px;margin-bottom:18px}
+h1{margin-top:0}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}input,select{width:100%;box-sizing:border-box;background:#17100c;color:#fff;border:1px solid #4a3324;border-radius:9px;padding:12px;margin-top:6px}
+button{background:#c89452;color:#1a1009;border:0;border-radius:9px;padding:11px 16px;font-weight:800;margin-top:14px;cursor:pointer}
+label{font-size:12px;color:#ad9685}.muted{color:#9d8877;font-size:13px}
+@media(max-width:650px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="card"><h1>Admin Dashboard — Demo</h1><p class="muted">This is a frontend demo. Connect it to a secure backend before production.</p></div>
+<div class="card"><h2>Add / Edit Song</h2>
+<div class="row">
+<label>Song title<input id="title" placeholder="Mayabini"></label>
+<label>Artist<input value="Zubeen Garg"></label>
+<label>Album<input placeholder="Album name"></label>
+<label>Year<input placeholder="2026"></label>
+<label>YouTube Video ID<input id="yt" placeholder="Example: dQw4w9WgXcQ"></label>
+<label>Category<select><option>Song</option><option>Radio</option><option>Playlist</option></select></label>
+</div>
+<button onclick="saveSong()">Save Song</button>
+<p id="msg" class="muted"></p>
+</div>
+<div class="card"><h2>Production checklist</h2>
+<ul class="muted"><li>Use PostgreSQL for the catalog.</li><li>Keep YouTube API key on the backend, never in frontend code.</li><li>Use official/authorised playback methods.</li><li>Add authentication, rate limits and server-side validation.</li><li>For larger traffic, add caching/CDN and monitoring.</li></ul>
+</div>
+</div>
+<script>
+function saveSong(){const t=document.getElementById('title').value.trim();const y=document.getElementById('yt').value.trim();document.getElementById('msg').textContent=t?`Saved demo record: ${t}${y?' (YouTube ID added)':''}`:'Enter a song title.'}
+</script>
+</body></html>
