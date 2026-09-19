@@ -1,68 +1,76 @@
-import express from 'express';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+const express = require('express');
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json());
 
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ ok: true, youtubeConfigured: Boolean(API_KEY) });
 });
 
 app.get('/api/youtube/search', async (req, res) => {
-  const q = String(req.query.q || '').trim();
-  const requestedMax = Number(req.query.maxResults || 10);
-  const maxResults = Math.min(Math.max(Number.isFinite(requestedMax) ? requestedMax : 10, 1), 25);
-
-  if (!q) return res.status(400).json({ error: 'Search query is required.' });
-  if (!API_KEY) return res.status(503).json({ error: 'YouTube API is not configured on the server.' });
-
-  const params = new URLSearchParams({
-    part: 'snippet',
-    q,
-    type: 'video',
-    videoEmbeddable: 'true',
-    maxResults: String(maxResults),
-    key: API_KEY
-  });
-
   try {
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/search?${params}`);
-    const data = await response.json();
+    if (!API_KEY) return res.status(500).json({ error: 'YOUTUBE_API_KEY is not configured on Render.' });
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.json({ items: [] });
 
-    if (!response.ok) {
-      const reason = data?.error?.errors?.[0]?.reason || 'YouTube API request failed.';
-      return res.status(response.status).json({ error: reason });
-    }
+    const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+    searchUrl.search = new URLSearchParams({
+      part: 'snippet',
+      q,
+      type: 'video',
+      maxResults: '15',
+      key: API_KEY
+    });
 
-    const songs = (data.items || []).map((item) => ({
-      id: `yt-${item.id.videoId}`,
-      title: item.snippet?.title || 'Untitled',
-      album: 'YouTube',
-      year: item.snippet?.publishedAt ? item.snippet.publishedAt.slice(0, 4) : '—',
-      youtubeId: item.id.videoId,
-      thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || '',
-      channelTitle: item.snippet?.channelTitle || '',
-      description: item.snippet?.description || ''
-    }));
+    const searchResp = await fetch(searchUrl);
+    const searchData = await searchResp.json();
+    if (!searchResp.ok) return res.status(searchResp.status).json({ error: searchData.error?.message || 'YouTube search failed.' });
 
-    res.set('Cache-Control', 'public, max-age=60');
-    res.json({ query: q, songs });
-  } catch (error) {
-    console.error('YouTube search error:', error);
-    res.status(502).json({ error: 'Could not reach YouTube right now.' });
+    const ids = (searchData.items || []).map(x => x.id?.videoId).filter(Boolean);
+    if (!ids.length) return res.json({ items: [] });
+
+    const videoUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+    videoUrl.search = new URLSearchParams({
+      part: 'status,snippet',
+      id: ids.join(','),
+      key: API_KEY
+    });
+
+    const videoResp = await fetch(videoUrl);
+    const videoData = await videoResp.json();
+    if (!videoResp.ok) return res.status(videoResp.status).json({ error: videoData.error?.message || 'YouTube video lookup failed.' });
+
+    const allowed = new Set((videoData.items || [])
+      .filter(v => v.status?.embeddable !== false && v.status?.privacyStatus === 'public')
+      .map(v => v.id));
+
+    const details = new Map((videoData.items || []).map(v => [v.id, v]));
+    const items = (searchData.items || [])
+      .map(x => {
+        const id = x.id?.videoId;
+        const d = details.get(id);
+        return {
+          id,
+          title: d?.snippet?.title || x.snippet?.title || '',
+          channelTitle: d?.snippet?.channelTitle || x.snippet?.channelTitle || '',
+          thumbnail: d?.snippet?.thumbnails?.high?.url || d?.snippet?.thumbnails?.medium?.url || x.snippet?.thumbnails?.high?.url || '',
+          embeddable: allowed.has(id)
+        };
+      })
+      .filter(x => x.id && x.embeddable);
+
+    res.json({ items });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while searching YouTube.' });
   }
 });
 
-const dist = path.join(__dirname, 'dist');
-app.use(express.static(dist));
-app.use((_req, res) => res.sendFile(path.join(dist, 'index.html')));
+app.use(express.static(path.join(__dirname, 'dist')));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
 
-app.listen(PORT, () => {
-  console.log(`Zubeen Player server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Zubeen Player running on port ${PORT}`));
