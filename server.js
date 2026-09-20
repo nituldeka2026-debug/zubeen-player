@@ -43,6 +43,12 @@ function rotationForNow(){
   return ROTATIONS[m<480?0:m<660?1:m<1020?2:m<1260?3:4][0];
 }
 
+function parseDuration(iso){
+  const m=String(iso||'').match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if(!m) return 0;
+  return Number(m[1]||0)*3600+Number(m[2]||0)*60+Number(m[3]||0);
+}
+
 async function youtubeSearch(q){
   if(!API_KEY) return [];
   const u=new URL('https://www.googleapis.com/youtube/v3/search');
@@ -57,7 +63,7 @@ async function youtubeSearch(q){
   if(!vr.ok) throw new Error(vd.error?.message||'YouTube API details failed');
   return (vd.items||[]).filter(x=>x.status?.privacyStatus==='public' && x.status?.embeddable!==false).map(x=>({
     id:x.id,title:x.snippet?.title||'Zubeen Garg',artist:x.snippet?.channelTitle||'Zubeen Garg',
-    year:(x.snippet?.publishedAt||'').slice(0,4)||'—',thumbnail:x.snippet?.thumbnails?.high?.url||x.snippet?.thumbnails?.medium?.url||`https://i.ytimg.com/vi/${x.id}/hqdefault.jpg`
+    year:(x.snippet?.publishedAt||'').slice(0,4)||'—',duration:parseDuration(x.contentDetails?.duration),thumbnail:x.snippet?.thumbnails?.high?.url||x.snippet?.thumbnails?.medium?.url||`https://i.ytimg.com/vi/${x.id}/hqdefault.jpg`
   }));
 }
 
@@ -72,7 +78,7 @@ async function autoSync(category){
       const ids=new Set(catalog.map(s=>s.youtubeId).filter(Boolean));
       const selected=results.filter(x=>!ids.has(x.id)).filter(x=>/zubeen|জুবিন/i.test(`${x.title} ${x.artist}`)).slice(0,8);
       for(const x of selected){
-        catalog.push({id:crypto.randomUUID(),title:x.title,artist:x.artist,year:x.year,category,youtubeId:x.id,thumbnail:x.thumbnail,enabled:true,source:'youtube-api'});
+        catalog.push({id:crypto.randomUUID(),title:x.title,artist:x.artist,year:x.year,category,youtubeId:x.id,duration:x.duration||0,thumbnail:x.thumbnail,enabled:true,source:'youtube-api'});
         ids.add(x.id);
       }
       if(selected.length) writeCatalog(catalog);
@@ -94,28 +100,48 @@ const listeners=new Map();
 // Global station state: every visitor receives the same song and playback position.
 const station = new Map();
 function stationKey(category){ return category || rotationForNow(); }
+function stationItems(category){
+  const key=stationKey(category);
+  return readCatalog().filter(s=>s.enabled!==false && s.category===key && (s.youtubeId||s.audioUrl));
+}
 function getStation(category, items){
   const key=stationKey(category);
+  items=items||stationItems(key);
   let st=station.get(key);
   if(!st || !items.some(x=>x.id===st.songId)){
     const first=items[0];
-    st={songId:first?.id||null, startedAt:Date.now(), revision:1};
+    st={songId:first?.id||null,startedAt:Date.now(),revision:1,duration:Number(first?.duration||0)};
     station.set(key,st);
   }
-  const song=items.find(x=>x.id===st.songId) || items[0];
-  if(song && song.id!==st.songId){ st.songId=song.id; st.startedAt=Date.now(); st.revision++; }
-  const elapsed=Math.max(0,(Date.now()-st.startedAt)/1000);
-  return {category:key,song,startedAt:st.startedAt,position:elapsed,revision:st.revision};
+  let song=items.find(x=>x.id===st.songId) || items[0];
+  if(song && song.id!==st.songId){
+    st.songId=song.id; st.startedAt=Date.now(); st.revision++; st.duration=Number(song.duration||0);
+  }
+  if(song && !st.duration && song.duration) st.duration=Number(song.duration);
+  let elapsed=Math.max(0,(Date.now()-st.startedAt)/1000);
+  // Server owns the clock. When the known duration is reached, advance automatically.
+  if(song && st.duration>0 && elapsed>=st.duration+0.25 && items.length>1){
+    const idx=Math.max(0,items.findIndex(x=>x.id===song.id));
+    const next=items[(idx+1)%items.length];
+    st={songId:next.id,startedAt:Date.now(),revision:(st.revision||0)+1,duration:Number(next.duration||0)};
+    station.set(key,st); song=next; elapsed=0;
+  }
+  return {category:key,song,startedAt:st.startedAt,serverNow:Date.now(),position:elapsed,duration:Number(st.duration||song?.duration||0),revision:st.revision};
 }
-function advanceStation(category, expectedSongId, direction=1){
-  const key=stationKey(category);
-  const items=readCatalog().filter(s=>s.enabled!==false && s.category===key && (s.youtubeId||s.audioUrl));
+function setStationDuration(category, songId, duration){
+  const key=stationKey(category); const st=station.get(key);
+  const sec=Math.floor(Number(duration)||0);
+  if(!st || st.songId!==songId || sec<1) return null;
+  st.duration=sec; station.set(key,st);
+  return getStation(key,stationItems(key));
+}
+function advanceStation(category){
+  const key=stationKey(category), items=stationItems(key);
   if(!items.length) return null;
-  let st=station.get(key);
-  const idx=Math.max(0,items.findIndex(x=>x.id===st?.songId));
-  if(expectedSongId && st && st.songId!==expectedSongId) return getStation(key,items);
-  const nextIndex=(idx+direction+items.length)%items.length;
-  st={songId:items[nextIndex].id,startedAt:Date.now(),revision:(st?.revision||0)+1};
+  const current=getStation(key,items);
+  const idx=Math.max(0,items.findIndex(x=>x.id===current.song.id));
+  const next=items[(idx+1)%items.length];
+  const st={songId:next.id,startedAt:Date.now(),revision:(current.revision||0)+1,duration:Number(next.duration||0)};
   station.set(key,st);
   return getStation(key,items);
 }
@@ -154,19 +180,13 @@ const server=http.createServer(async (req,res)=>{
       if(!items.length) return json(res,404,{error:'No playable songs in this rotation'});
       return json(res,200,getStation(cat,items));
     }
-    if(req.method==='POST' && u.pathname==='/api/radio/advance'){
+    if(req.method==='POST' && u.pathname==='/api/radio/advance') return json(res,403,{error:'Station controls are locked. Songs change automatically for everyone.'});
+    if(req.method==='POST' && u.pathname==='/api/radio/previous') return json(res,403,{error:'Station controls are locked. Songs change automatically for everyone.'});
+    if(req.method==='POST' && u.pathname==='/api/radio/report-duration'){
       const b=await body(req); const cat=clean(b.category,100)||rotationForNow();
-      const state=advanceStation(cat,clean(b.songId,200),1);
-      if(!state) return json(res,404,{error:'No playable songs in this rotation'});
+      const state=setStationDuration(cat,clean(b.songId,200),b.duration);
+      if(!state) return json(res,409,{error:'Station state changed; duration ignored'});
       return json(res,200,state);
-    }
-    if(req.method==='POST' && u.pathname==='/api/radio/previous'){
-      const b=await body(req); const cat=clean(b.category,100)||rotationForNow();
-      const key=stationKey(cat); const items=readCatalog().filter(s=>s.enabled!==false && s.category===key && (s.youtubeId||s.audioUrl));
-      if(!items.length) return json(res,404,{error:'No playable songs in this rotation'});
-      const st=station.get(key); const idx=Math.max(0,items.findIndex(x=>x.id===st?.songId));
-      const prev=items[(idx-1+items.length)%items.length]; station.set(key,{songId:prev.id,startedAt:Date.now(),revision:(st?.revision||0)+1});
-      return json(res,200,getStation(key,items));
     }
     if(req.method==='GET' && u.pathname==='/api/admin/songs') return json(res,200,{items:readCatalog()});
     if(req.method==='POST' && u.pathname==='/api/admin/songs'){

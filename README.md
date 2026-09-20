@@ -19,3 +19,11 @@ Start Command: `node server.js`
 Environment Variable: `YOUTUBE_API_KEY` = your YouTube Data API v3 key.
 
 After deploy, open the site and press the round Play button once. The video will then play inside the radio player.
+
+
+## 4.0 Global Live Radio
+- Song selection is locked for listeners. Next/Previous and track clicks cannot change the station.
+- The server owns the station clock and song timeline.
+- Every listener syncs to the server timeline using server timestamps.
+- YouTube duration is reported to the server when available so song changes happen automatically for everyone.
+- Listeners may press Listen to join the live stream, but cannot pause/seek/change the station timeline.
