@@ -6,6 +6,8 @@ const ROTATIONS=[
  {s:1260,e:1440,name:'Midnight Melodies',as:'মাজনিশাৰ সুৰ',desc:'Slow, soulful and unhurried.'}
 ];
 let songs=[], currentIndex=0, current=null, player=null, playerReady=false, playing=false, ytApiFailed=false, stationState=null, stationPoll=null, stationApplying=false, session=localStorage.getItem('zubeen_sid')||crypto.randomUUID();
+const RADIO_SYNC_MS=2000;
+const RADIO_DRIFT_SEC=2;
 localStorage.setItem('zubeen_sid',session);
 const $=id=>document.getElementById(id);
 function now(){const d=new Date(),m=d.getHours()*60+d.getMinutes();return {d,m,r:ROTATIONS.find(r=>m>=r.s&&m<r.e)||ROTATIONS[4]};}
@@ -48,24 +50,60 @@ function select(i,auto){
   fetch('/api/radio/advance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,songId:songs[i]?.id})})
     .then(r=>r.json()).then(st=>{if(st.song){stationState=st;applySong(st.song,0,auto);}}).catch(()=>applySong(songs[i],0,auto));
 }
+function stationPosition(st){
+  if(!st)return 0;
+  if(st.startedAt)return Math.max(0,(Date.now()-Number(st.startedAt))/1000);
+  return Math.max(0,Number(st.position)||0);
+}
+function seekLocalTo(sec){
+  const target=Math.max(0,Number(sec)||0);
+  try{
+    if(playerReady&&player&&typeof player.getCurrentTime==='function'){
+      const cur=Number(player.getCurrentTime()||0);
+      if(Math.abs(cur-target)>RADIO_DRIFT_SEC) player.seekTo(target,true);
+      return;
+    }
+    const frame=document.getElementById('ytDirect');
+    if(frame&&frame.contentWindow){
+      frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'seekTo',args:[target,true]}),'https://www.youtube.com');
+    }
+  }catch{}
+}
 function applyStationState(st,autoPlay=false){
   if(!st?.song)return;
+  const target=stationPosition(st);
+  const same=current?.id===st.song.id;
   stationState=st;
-  applySong(st.song,Number(st.position)||0,autoPlay);
+  if(!same){
+    applySong(st.song,target,autoPlay);
+    return;
+  }
+  // Same song: never restart it. Correct only the clock drift so every listener stays on the same timeline.
+  const frame=document.getElementById('ytDirect');
+  if(playerReady&&player&&typeof player.getCurrentTime==='function'){
+    const cur=Number(player.getCurrentTime()||0);
+    if(Math.abs(cur-target)>RADIO_DRIFT_SEC) player.seekTo(target,true);
+  }else if(frame){
+    try{
+      frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'seekTo',args:[target,true]}),'https://www.youtube.com');
+    }catch{}
+  }
+  if(autoPlay){
+    if(playerReady&&player) player.playVideo();
+    else if(frame) { try{frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'playVideo',args:[]}), 'https://www.youtube.com');}catch{} }
+  }
 }
 async function syncStation(autoPlay=false){
   const category=now().r.name;
   try{
     const r=await fetch('/api/radio/state?category='+encodeURIComponent(category),{cache:'no-store'}); const st=await r.json();
     if(!r.ok) throw new Error(st.error||'Station state unavailable');
-    const changed=!stationState || stationState.song?.id!==st.song?.id || Math.abs((Number(st.position)||0)-(Number(stationState.position)||0))>8;
-    if(changed) applyStationState(st,autoPlay);
-    else stationState=st;
+    applyStationState(st,autoPlay);
   }catch(e){ if(!stationState && songs[0]) applySong(songs[0],0,autoPlay); }
 }
 function startStationSync(){
   clearInterval(stationPoll);
-  stationPoll=setInterval(()=>syncStation(false),5000);
+  stationPoll=setInterval(()=>syncStation(false),RADIO_SYNC_MS);
 }
 async function next(){
   const category=now().r.name;
