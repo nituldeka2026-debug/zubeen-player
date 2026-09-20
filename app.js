@@ -8,12 +8,27 @@ const ROTATIONS=[
 let songs=[], currentIndex=0, current=null, player=null, playerReady=false, playing=false, ytApiFailed=false, stationState=null, stationPoll=null, stationApplying=false, session=localStorage.getItem('zubeen_sid')||crypto.randomUUID();
 const RADIO_SYNC_MS=1500;
 const RADIO_DRIFT_SEC=0.75;
+let progressTimer=null;
 let serverClockOffsetMs=0;
 localStorage.setItem('zubeen_sid',session);
 const $=id=>document.getElementById(id);
 function now(){const d=new Date(),m=d.getHours()*60+d.getMinutes();return {d,m,r:ROTATIONS.find(r=>m>=r.s&&m<r.e)||ROTATIONS[4]};}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmt(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}
+function updateProgress(){
+  if(!playerReady||!player||typeof player.getCurrentTime!=='function') return;
+  try{
+    const t=Number(player.getCurrentTime()||0);
+    const d=Number(player.getDuration()||0);
+    $('cur').textContent=fmt(t);
+    if(d>0){ $('dur').textContent=fmt(d); $('seek').max=String(d); $('seek').value=String(Math.min(t,d)); }
+  }catch{}
+}
+function startProgress(){
+  clearInterval(progressTimer);
+  progressTimer=setInterval(updateProgress,250);
+  updateProgress();
+}
 function notice(t,ok=false){$('notice').textContent=t;$('notice').className='notice '+(ok?'ok':'');}
 function tick(){const x=now(),d=x.d;$('clock').textContent=d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});$('date').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});$('rotation').textContent=x.r.name;const left=Math.max(0,x.r.e-x.m);$('remaining').textContent=`${left} MIN LEFT`;renderSchedule(x.r);}
 function renderSchedule(active){$('schedule').innerHTML=ROTATIONS.map(r=>`<div class="srow ${r.name===active.name?'active':''}"><b>${r.s/60|0}:00–${r.e===1440?'00:00':String(r.e/60|0).padStart(2,'0')}:00</b><span>${esc(r.name)}<small>${esc(r.as)}</small></span>${r.name===active.name?'<i>● ON AIR</i>':''}</div>`).join('');}
@@ -138,6 +153,7 @@ function onYTReady(){
   try{
     player=new YT.Player('yt',{width:'100%',height:'100%',videoId:'',playerVars:{controls:0,rel:0,playsinline:1,origin:location.origin},events:{onReady:()=>{
         playerReady=true;
+        startProgress();
         if(current?.youtubeId) player.cueVideoById({videoId:current.youtubeId,startSeconds:stationPosition(stationState)});
         try{
           const duration=player.getDuration();
@@ -166,7 +182,7 @@ function loadYTApi(){
   setTimeout(()=>{if(!playerReady&&!window.YT?.Player){ytApiFailed=true;if(current?.youtubeId)showDirectEmbed(current.youtubeId,false);notice('YouTube API is unavailable here. Direct YouTube player enabled.',true);}},7000);
 }
 $('play').onclick=toggle;$('next').onclick=next;$('prev').onclick=prev;
-$('next').disabled=true;$('prev').disabled=true;$('next').title='Live radio: song changes automatically';$('prev').title='Live radio: song changes automatically';$('play').textContent='▶ LISTEN';$('vol').oninput=e=>{if(player?.setVolume)player.setVolume(Number(e.target.value));};$('bgBtn').onclick=()=>{document.body.classList.toggle('no-bg');};
+$('next').disabled=true;$('prev').disabled=true;$('seek').disabled=true;$('seek').title='Live radio: seeking is locked';$('next').title='Live radio: song changes automatically';$('prev').title='Live radio: song changes automatically';$('play').textContent='▶ LISTEN';$('vol').oninput=e=>{if(player?.setVolume)player.setVolume(Number(e.target.value));};$('bgBtn').onclick=()=>{document.body.classList.toggle('no-bg');};
 setInterval(tick,1000);tick();
 setInterval(async()=>{try{const r=await fetch('/api/listeners/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:session})});const d=await r.json();$('listeners').textContent=d.listeners||1;}catch{}},20000);
 (async()=>{await bootstrap();await syncStation(false);startStationSync();loadYTApi();if(ytApiFailed&&current?.youtubeId)showDirectEmbed(current.youtubeId,false,Number(stationState?.position)||0);})();
