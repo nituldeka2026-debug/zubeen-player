@@ -91,6 +91,34 @@ async function autoSync(category){
 }
 
 const listeners=new Map();
+// Global station state: every visitor receives the same song and playback position.
+const station = new Map();
+function stationKey(category){ return category || rotationForNow(); }
+function getStation(category, items){
+  const key=stationKey(category);
+  let st=station.get(key);
+  if(!st || !items.some(x=>x.id===st.songId)){
+    const first=items[0];
+    st={songId:first?.id||null, startedAt:Date.now(), revision:1};
+    station.set(key,st);
+  }
+  const song=items.find(x=>x.id===st.songId) || items[0];
+  if(song && song.id!==st.songId){ st.songId=song.id; st.startedAt=Date.now(); st.revision++; }
+  const elapsed=Math.max(0,(Date.now()-st.startedAt)/1000);
+  return {category:key,song,startedAt:st.startedAt,position:elapsed,revision:st.revision};
+}
+function advanceStation(category, expectedSongId, direction=1){
+  const key=stationKey(category);
+  const items=readCatalog().filter(s=>s.enabled!==false && s.category===key && (s.youtubeId||s.audioUrl));
+  if(!items.length) return null;
+  let st=station.get(key);
+  const idx=Math.max(0,items.findIndex(x=>x.id===st?.songId));
+  if(expectedSongId && st && st.songId!==expectedSongId) return getStation(key,items);
+  const nextIndex=(idx+direction+items.length)%items.length;
+  st={songId:items[nextIndex].id,startedAt:Date.now(),revision:(st?.revision||0)+1};
+  station.set(key,st);
+  return getStation(key,items);
+}
 setInterval(()=>{const now=Date.now();for(const [id,t] of listeners)if(now-t>45000)listeners.delete(id);},15000).unref();
 
 function safeFile(p){
@@ -119,6 +147,26 @@ const server=http.createServer(async (req,res)=>{
       const q=clean(u.searchParams.get('q'),180); if(!q)return json(res,200,{items:[]});
       if(!API_KEY)return json(res,503,{error:'YOUTUBE_API_KEY is not configured on Render.'});
       return json(res,200,{items:await youtubeSearch(q)});
+    }
+    if(req.method==='GET' && u.pathname==='/api/radio/state'){
+      const cat=clean(u.searchParams.get('category'),100)||rotationForNow();
+      const items=readCatalog().filter(s=>s.enabled!==false && s.category===cat && (s.youtubeId||s.audioUrl));
+      if(!items.length) return json(res,404,{error:'No playable songs in this rotation'});
+      return json(res,200,getStation(cat,items));
+    }
+    if(req.method==='POST' && u.pathname==='/api/radio/advance'){
+      const b=await body(req); const cat=clean(b.category,100)||rotationForNow();
+      const state=advanceStation(cat,clean(b.songId,200),1);
+      if(!state) return json(res,404,{error:'No playable songs in this rotation'});
+      return json(res,200,state);
+    }
+    if(req.method==='POST' && u.pathname==='/api/radio/previous'){
+      const b=await body(req); const cat=clean(b.category,100)||rotationForNow();
+      const key=stationKey(cat); const items=readCatalog().filter(s=>s.enabled!==false && s.category===key && (s.youtubeId||s.audioUrl));
+      if(!items.length) return json(res,404,{error:'No playable songs in this rotation'});
+      const st=station.get(key); const idx=Math.max(0,items.findIndex(x=>x.id===st?.songId));
+      const prev=items[(idx-1+items.length)%items.length]; station.set(key,{songId:prev.id,startedAt:Date.now(),revision:(st?.revision||0)+1});
+      return json(res,200,getStation(key,items));
     }
     if(req.method==='GET' && u.pathname==='/api/admin/songs') return json(res,200,{items:readCatalog()});
     if(req.method==='POST' && u.pathname==='/api/admin/songs'){
