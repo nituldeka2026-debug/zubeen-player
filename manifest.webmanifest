@@ -1,0 +1,9 @@
+{
+  "name": "Zubeen Radio",
+  "short_name": "Zubeen Radio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0807",
+  "theme_color": "#0b0807",
+  "description": "Zubeen Radio — live Assamese music station"
+}

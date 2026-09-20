@@ -24,3 +24,8 @@ Start Command: `node server.js`
 Environment variable: `YOUTUBE_API_KEY` (optional; fallback catalogue still works)
 
 Node: 18+
+
+
+## Background playback
+
+This build supports true mobile background playback when a song has a direct `audioUrl` (MP3/M4A/AAC/OGG/WAV). It uses the native HTML audio element and Media Session API for lock-screen/headset controls. YouTube iframe playback remains subject to mobile browser/YouTube background-playback restrictions. Add direct audio URLs through the admin song form for reliable background playback.
