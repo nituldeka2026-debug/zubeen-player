@@ -1,63 +1,93 @@
 <!doctype html>
-<html lang="as">
+<html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b0807"><title>Zubeen Radio — Live</title>
-<link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css"><link rel="manifest" href="/manifest.webmanifest">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#06111f" />
+  <title>Zubeen Radio — 24/7 Endless</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Assamese:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="bg"></div><div class="shade"></div>
-<div id="tune" class="tune-screen">
-  <div class="tune-inner">
-    <div class="est">EST. GUWAHATI • ASSAM</div>
-    <div class="tune-mark">ZUBEEN RADIO</div>
-    <h1>জুবিন দা ৰেডিঅ'</h1>
-    <p>One voice. One live timeline.<br>Everyone hears the same second.</p>
-    <div class="tune-listeners">● <span id="tuneListeners">1</span> LISTENING</div>
-    <button id="tuneBtn" class="tune-btn">TUNE IN</button>
-    <div class="tune-meta"><span>● ON AIR</span><b id="tuneProgram">EVENING MEMORIES</b></div>
-    <div class="tune-clock"><strong id="tuneClock">--:--</strong><small id="tuneDate">--</small></div>
-  </div>
-</div>
-<header>
-  <div class="time-block"><b id="clock">--:--</b><small id="date">--</small></div>
-  <div class="station-top"><i></i><span>ON AIR</span><b>ZUBEEN RADIO</b></div>
-  <nav><a href="#live">Live</a><a href="/schedule.html">Schedule</a></nav>
-</header>
-<main id="live">
-  <section class="live-head">
-    <div><span class="kicker">LIVE FROM ASSAM • INDIA</span><h2>জুবিন দা ৰেডিঅ'</h2><p>One voice. Playing without pause. The station clock decides the timeline.</p></div>
-    <div class="big-time"><strong id="bigClock">--:--</strong><span id="bigDate">--</span><em>IST · ASIA/KOLKATA</em></div>
-  </section>
-  <section class="live-panel">
-    <div class="program-line"><span>● ON AIR</span><b id="programName">EVENING MEMORIES</b><small id="programRemain">--</small></div>
-    <div class="player-grid">
-      <div class="art-stage">
-        <div id="yt"></div><audio id="radioAudio" preload="none" playsinline></audio>
-        <div id="cover" class="cover">ZG</div>
-        <div class="art-vignette"></div>
-        <div class="art-badge">LIVE RADIO</div>
-      </div>
-      <div class="now-card">
-        <div class="eyebrow">NOW PLAYING</div>
-        <h1 id="title">Loading song…</h1>
-        <p id="artist">Zubeen Garg</p>
-        <div id="meta" class="meta">Automatic station • YouTube</div>
-        <div class="timeline"><span id="cur">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="dur">0:00</span></div>
-        <div class="timeline-note">LIVE TIMELINE • SEEKING LOCKED</div>
-        <div class="control-row"><button id="play" class="main-play">▶ TUNE IN</button><div class="wave" id="wave">▂▅▇▃▆▂▇▅</div><label class="volume">VOL <input id="vol" type="range" min="0" max="100" value="85"></label></div>
-        <div class="radio-state"><span>● LIVE RADIO</span><b><span id="listeners">1</span> LISTENING</b></div>
-        <div class="show-box"><div><small>CURRENT PROGRAM</small><strong id="currentShow">Evening Memories</strong></div><div><small>NEXT PROGRAM</small><strong id="nextShow">Midnight Zubeen</strong></div></div>
-        <div class="actions"><button id="bgBtn">◒ BACKGROUND</button><button id="screenBtn">▣ SCREEN ON</button><a href="https://open.spotify.com/search/Zubeen%20Garg" target="_blank" rel="noreferrer">SPOTIFY ↗</a><a href="https://music.youtube.com/search?q=Zubeen%20Garg" target="_blank" rel="noreferrer">YT MUSIC ↗</a></div>
-      </div>
-    </div>
-  </section>
-  <div id="notice" class="notice">Radio loading…</div>
-  <!-- Lower history / schedule / about panels removed for a cleaner 4.3 layout. -->
+  <div class="bg"></div>
+  <div class="shade"></div>
+  <div class="grain"></div>
 
-</main>
-<footer>ZUBEEN RADIO • 24/7 LIVE STATION • SAME SONG • SAME SECOND • GUWAHATI CLOCK</footer>
-<script src="/app.js"></script>
-</body></html>
+  <main class="app">
+    <header class="topbar">
+      <div class="clock-block">
+        <div id="clock" class="clock">11:40 <small>PM</small></div>
+        <div id="date" class="date">SUNDAY, 20 SEPTEMBER</div>
+        <div class="tz">• IST</div>
+        <div class="listeners">◉ <span id="listeners">432</span>&nbsp; LISTENING</div>
+      </div>
+
+      <div class="standby">● &nbsp; STANDING BY · <b>MIDNIGHT MELODIES</b></div>
+
+      <nav class="nav">
+        <a href="#">zubeengarg.xyz ↗</a>
+        <a href="#">Scene</a>
+        <a class="live" href="#">Live <i>•</i></a>
+        <a href="schedule.html">Schedule</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="signal">⌁</div>
+      <h1>জুবিন দা ৰেডিঅ'</h1>
+      <div class="brand">Z U B E E N &nbsp; R A D I O</div>
+
+      <section class="player" aria-label="Radio player">
+        <div class="artwork">
+          <div class="artwork-photo"></div>
+          <div class="art-overlay">
+            <span class="playing-dot">● NOW PLAYING LIVE</span>
+            <strong>ZUBEEN RADIO</strong>
+            <div class="equalizer"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="eyebrow">NOW PLAYING</div>
+          <div class="song-row">
+            <div>
+              <h2 id="songTitle">Mayabini</h2>
+              <p>ZUBEEN GARG</p>
+            </div>
+            <button class="more" aria-label="More">⌄</button>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress"><span id="progressBar"></span></div>
+            <div class="times"><span id="current">2:22</span><span>5:37</span></div>
+          </div>
+
+          <div class="main-controls">
+            <button class="circle small" aria-label="Previous">⏮</button>
+            <button id="play" class="circle play" aria-label="Play">▶</button>
+            <button class="circle small" aria-label="Next">⏭</button>
+            <div class="volume">
+              <span>⌕</span>
+              <input id="volume" type="range" min="0" max="100" value="78" aria-label="Volume" />
+            </div>
+          </div>
+
+          <div class="chips">
+            <button>◉ BACKGROUND</button>
+            <button>▣ SCREEN ON</button>
+            <span class="spacer"></span>
+            <button>◉ SPOTIFY</button>
+            <button>● YT MUSIC</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer>FIVE ROTATIONS A DAY, SET BY THE CLOCK IN GUWAHATI · THE STATION IS FREE AND STAYS FREE</footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
