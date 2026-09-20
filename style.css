@@ -40,3 +40,281 @@
 
 /* CLEAN 4.3 HOME: lower panels removed */
 main{padding-bottom:34px}.live-panel{margin-bottom:0}.notice{margin-bottom:4px}@media(max-width:850px){main{padding-bottom:24px}}
+
+
+/* MOBILE FIX — Zubeen Radio 4.3
+   Desktop layout intentionally preserved. */
+@media (max-width: 700px){
+  html,body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    -webkit-text-size-adjust:100%;
+  }
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  .tune-screen{
+    min-height:100dvh;
+    padding:22px 18px calc(22px + env(safe-area-inset-bottom));
+    overflow-y:auto;
+  }
+  .tune-inner{width:100%;max-width:430px}
+  .tune-mark{margin-top:24px;letter-spacing:3px}
+  .tune-inner h1{
+    font-size:clamp(31px,9vw,42px);
+    line-height:1.12;
+    margin:15px 0 10px;
+  }
+  .tune-inner p{font-size:8px;line-height:1.7}
+  .tune-listeners{margin:20px 0 16px;padding:9px 13px}
+  .tune-btn{
+    min-height:52px;
+    width:min(260px,100%);
+    padding:15px 24px;
+  }
+  .tune-meta{
+    flex-wrap:wrap;
+    gap:8px 12px;
+    margin-top:22px;
+  }
+  .tune-clock{margin-top:22px}
+  .tune-clock strong{font-size:21px}
+
+  header{
+    height:auto;
+    min-height:68px;
+    padding:12px 16px;
+    grid-template-columns:auto 1fr auto;
+    column-gap:10px;
+  }
+  .time-block b{font-size:17px}
+  .time-block small{font-size:6px;white-space:nowrap}
+  .station-top{
+    justify-content:center;
+    min-width:0;
+    font-size:6px;
+  }
+  .station-top b{display:none}
+  nav{
+    display:flex;
+    gap:8px;
+  }
+  nav a{
+    font-size:6px;
+    padding:10px 7px;
+    white-space:nowrap;
+  }
+
+  main{
+    width:calc(100% - 24px);
+    max-width:100%;
+    margin:0 auto;
+    padding-bottom:20px;
+  }
+  .live-head{
+    display:block;
+    padding:28px 2px 20px;
+  }
+  .live-head h2{
+    font-size:29px;
+    line-height:1.18;
+    margin:9px 0 7px;
+  }
+  .live-head p{
+    font-size:7px;
+    line-height:1.7;
+    max-width:330px;
+  }
+  .big-time{
+    text-align:left;
+    margin-top:18px;
+  }
+  .big-time strong{font-size:31px}
+  .big-time span{font-size:7px}
+  .big-time em{font-size:5.5px}
+
+  .live-panel{
+    width:100%;
+    border-radius:10px;
+  }
+  .program-line{
+    min-height:43px;
+    height:auto;
+    padding:11px 13px;
+    gap:8px;
+    flex-wrap:wrap;
+    font-size:6px;
+  }
+  .program-line b{
+    max-width:calc(100% - 110px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .program-line small{
+    font-size:5.5px;
+    margin-left:auto;
+    white-space:nowrap;
+  }
+
+  .player-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    width:100%;
+  }
+  .art-stage{
+    width:100%;
+    height:min(88vw,360px);
+    min-height:235px;
+    max-height:360px;
+    aspect-ratio:1/1;
+  }
+  .art-stage #yt,
+  .art-stage iframe{
+    width:100%;
+    height:100%;
+  }
+  .cover{
+    font-size:52px;
+    background-position:center center;
+  }
+  .art-badge{
+    left:11px;
+    bottom:11px;
+    padding:6px 8px;
+    font-size:5.5px;
+  }
+
+  .now-card{
+    width:100%;
+    min-width:0;
+    padding:22px 16px 18px;
+    display:block;
+  }
+  .eyebrow{font-size:6px}
+  .now-card h1{
+    font-size:25px;
+    line-height:1.18;
+    margin:9px 0 5px;
+    overflow-wrap:anywhere;
+  }
+  .now-card>p{
+    font-size:8px;
+    line-height:1.5;
+  }
+  .meta{
+    font-size:6px;
+    line-height:1.5;
+    overflow-wrap:anywhere;
+    margin-top:8px;
+  }
+  .timeline{
+    grid-template-columns:32px minmax(0,1fr) 38px;
+    gap:6px;
+    margin-top:20px;
+  }
+  .timeline input{min-width:0}
+  .timeline-note{
+    font-size:5.5px;
+    margin-top:5px;
+  }
+  .control-row{
+    display:grid;
+    grid-template-columns:minmax(112px,auto) 1fr;
+    gap:10px;
+    margin-top:14px;
+    align-items:center;
+  }
+  .main-play{
+    min-width:0;
+    min-height:44px;
+    padding:11px 14px;
+    font-size:6.5px;
+  }
+  .wave{
+    font-size:12px;
+    text-align:right;
+    margin-left:0;
+  }
+  .volume{
+    grid-column:1/-1;
+    width:100%;
+    justify-content:space-between;
+    min-height:38px;
+    font-size:6px;
+  }
+  .volume input{
+    flex:1;
+    min-width:0;
+    margin-left:8px;
+  }
+  .radio-state{
+    margin-top:16px;
+    padding:10px 0;
+    font-size:6px;
+    gap:10px;
+  }
+  .show-box{
+    grid-template-columns:1fr;
+    gap:7px;
+    margin-top:11px;
+  }
+  .show-box div{padding:9px 10px}
+  .show-box strong{
+    font-size:11px;
+    line-height:1.3;
+    overflow-wrap:anywhere;
+  }
+  .actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-top:12px;
+  }
+  .actions button,.actions a{
+    min-height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px 7px;
+    font-size:5.5px;
+    text-align:center;
+  }
+  .notice{
+    min-height:18px;
+    padding:9px 2px 2px;
+    font-size:6px;
+    line-height:1.6;
+    overflow-wrap:anywhere;
+  }
+  footer{
+    padding:18px 16px calc(22px + env(safe-area-inset-bottom));
+    font-size:5px;
+    line-height:1.7;
+  }
+}
+
+/* Small phones: keep everything inside 320–380px screens. */
+@media (max-width: 380px){
+  header{
+    padding-left:12px;
+    padding-right:12px;
+    column-gap:7px;
+  }
+  .time-block b{font-size:15px}
+  nav{gap:2px}
+  nav a{padding:9px 5px}
+  main{width:calc(100% - 18px)}
+  .live-head{padding-top:23px}
+  .live-head h2{font-size:26px}
+  .art-stage{height:78vw;min-height:220px}
+  .now-card{padding-left:13px;padding-right:13px}
+  .now-card h1{font-size:23px}
+  .program-line b{max-width:calc(100% - 100px)}
+  .control-row{grid-template-columns:1fr}
+  .wave{display:none}
+  .main-play{width:100%}
+}
+
+/* Prevent accidental horizontal scroll from third-party embeds/long text. */
+img,video,iframe{max-width:100%}
+button,a,input{touch-action:manipulation}
