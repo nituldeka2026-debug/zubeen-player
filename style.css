@@ -37,3 +37,6 @@
 
 @media(max-width:950px){.clean-sections{grid-template-columns:1fr 1fr}.about-card{grid-column:1/-1;min-height:0}.player-grid{grid-template-columns:minmax(270px,43%) 1fr}.art-stage{min-height:300px}}
 @media(max-width:700px){.player-grid{grid-template-columns:1fr}.art-stage{min-height:260px}.now-card{padding:25px 20px}.clean-sections{grid-template-columns:1fr;gap:12px}.about-card{grid-column:auto}.clean-card{padding:17px 16px}}
+
+/* CLEAN 4.3 HOME: lower panels removed */
+main{padding-bottom:34px}.live-panel{margin-bottom:0}.notice{margin-bottom:4px}@media(max-width:850px){main{padding-bottom:24px}}
