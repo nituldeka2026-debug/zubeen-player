@@ -1,5 +1,5 @@
 [
-  {"id":"seed-1","title":"Phoolate Bohagare","artist":"Zubeen Garg","year":"2022","category":"Bihu & High Energy","youtubeId":"","audioUrl":"","thumbnail":"","enabled":true},
-  {"id":"seed-2","title":"Mayabini","artist":"Zubeen Garg","year":"—","category":"Assamese Modern Classics","youtubeId":"","audioUrl":"","thumbnail":"","enabled":true},
-  {"id":"seed-3","title":"Monole Ubhoti Ahe","artist":"Zubeen Garg","year":"—","category":"Assamese Modern Classics","youtubeId":"","audioUrl":"","thumbnail":"","enabled":true}
+  {"id":"seed-mayabini","title":"Mayabini","artist":"Zubeen Garg","year":"2006","category":"Assamese Modern Classics","youtubeId":"o2uNk9lh5RU","thumbnail":"https://i.ytimg.com/vi/o2uNk9lh5RU/hqdefault.jpg","enabled":true,"source":"official-youtube-fallback"},
+  {"id":"seed-monole","title":"Monole Ubhoti Ahe","artist":"Zubeen Garg","year":"2025","category":"Assamese Modern Classics","youtubeId":"BD-WtD3hU3M","thumbnail":"https://i.ytimg.com/vi/BD-WtD3hU3M/hqdefault.jpg","enabled":true,"source":"official-youtube-fallback"},
+  {"id":"seed-bhed","title":"Mur Monot Bhed Bhav Nai","artist":"Zubeen Garg","year":"2021","category":"Assamese Modern Classics","youtubeId":"JMj0StLwyRc","thumbnail":"https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg","enabled":true,"source":"official-youtube-fallback"}
 ]
