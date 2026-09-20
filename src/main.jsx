@@ -35,23 +35,38 @@ function App(){
   const audioRef=useRef(null);
   const ytRef=useRef(null);
   const ytReady=useRef(false);
+  const autoplayNext=useRef(false);
   const sessionRef=useRef(localStorage.getItem('zubeen_listener_id')||makeSessionId());
   const rotation=rotationFor(clock);
 
   useEffect(()=>localStorage.setItem('zubeen_listener_id',sessionRef.current),[]);
   useEffect(()=>{const t=setInterval(()=>setClock(new Date()),1000);return()=>clearInterval(t)},[]);
 
-  async function loadSongs(){
+  async function loadSongs(category=rotation.cat){
     try{
-      const r=await fetch('/api/songs');
-      const d=await r.json();
-      const items=d.items||[];
+      let r=await fetch('/api/songs');
+      let d=await r.json();
+      let items=d.items||[];
+      let categoryItems=items.filter(s=>s.category===category && (s.youtubeId||s.audioUrl));
+      if(!categoryItems.length){
+        const sync=await fetch('/api/radio/auto-sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category})});
+        const syncData=await sync.json().catch(()=>({}));
+        if(sync.ok){
+          r=await fetch('/api/songs'); d=await r.json(); items=d.items||[];
+          categoryItems=items.filter(s=>s.category===category && (s.youtubeId||s.audioUrl));
+        } else if(syncData.error){
+          setNotice(syncData.error);
+        }
+      }
       setSongs(items);
-      setCurrent(prev=>prev&&items.some(x=>x.id===prev.id)?prev:items[0]||null);
-      setNotice('');
+      if(categoryItems.length) setNotice('');
+      setCurrent(prev=>{
+        if(categoryItems.length && (!prev || prev.category!==category)) return categoryItems[0];
+        return prev&&items.some(x=>x.id===prev.id)?prev:categoryItems[0]||items[0]||null;
+      });
     }catch{setNotice('Radio server connect hua nai. Render deployment check kora.')}
   }
-  useEffect(()=>{loadSongs()},[]);
+  useEffect(()=>{loadSongs(rotation.cat)},[rotation.cat]);
 
   useEffect(()=>{
     let alive=true;
@@ -83,7 +98,7 @@ function App(){
             if(e.data===window.YT.PlayerState.PAUSED || e.data===window.YT.PlayerState.CUED)setPlaying(false);
             if(e.data===window.YT.PlayerState.ENDED){setPlaying(false);nextSong()}
           },
-          onError:()=>setNotice('Ei YouTube video playback unavailable. Admin-ot another embeddable video add kora.')
+          onError:()=>setNotice('Ei YouTube video playback unavailable. Radio next playable song bisari ase.')
         }
       });
     };
@@ -95,7 +110,14 @@ function App(){
 
   useEffect(()=>{
     if(!current?.youtubeId || current?.audioUrl || !ytReady.current || !ytRef.current)return;
-    try{ytRef.current.cueVideoById(current.youtubeId);setPlaying(false)}catch{}
+    try{
+      ytRef.current.cueVideoById(current.youtubeId);
+      setPlaying(false);
+      if(autoplayNext.current){
+        autoplayNext.current=false;
+        setTimeout(()=>{try{ytRef.current?.playVideo()}catch{}},250);
+      }
+    }catch{}
   },[current?.id,current?.youtubeId,current?.audioUrl]);
 
   useEffect(()=>{
@@ -114,7 +136,7 @@ function App(){
       // No MP3: the embedded YouTube video is the playback source.
       setNotice('');
     }else{
-      setNotice('Ei song-r MP3 ba YouTube video nai. Admin-ot source add kora.');
+      setNotice('Ei song playable nohoi. Radio next song bisari ase.');
     }
   },[current?.id]);
 
@@ -122,7 +144,7 @@ function App(){
 
   function playSong(song){if(!song)return;setCurrent(song);setNotice('')}
   function togglePlay(){
-    if(!current){setNotice('Admin-ot songs add kora.');return}
+    if(!current){setNotice('Automatic radio catalog load hoi ase.');return}
     if(current.audioUrl){
       const a=audioRef.current;
       if(!a)return;
@@ -145,6 +167,7 @@ function App(){
     const list=rotationSongs.length?rotationSongs:songs;
     if(!list.length)return;
     const i=list.findIndex(s=>s.id===current?.id);
+    autoplayNext.current=true;
     playSong(list[(i+1+list.length)%list.length]);
   }
   function prevSong(){
@@ -168,7 +191,7 @@ function App(){
     <header className="topbar">
       <div><div className="clock">{clockText(clock)}</div><div className="date">{clock.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase()}</div></div>
       <div className="onair"><i/> ON AIR • {rotation.title.toUpperCase()}</div>
-      <nav><a href="https://www.youtube.com/" target="_blank" rel="noreferrer">YouTube</a><a href="/schedule.html">Schedule</a><a href="/admin.html">Admin</a></nav>
+      <nav><a href="https://www.youtube.com/" target="_blank" rel="noreferrer">YouTube</a><a href="/schedule.html">Schedule</a></nav>
     </header>
 
     <main>
@@ -189,7 +212,7 @@ function App(){
           <div className="player-info">
             <div className="label">NOW PLAYING <span>{current?'• LIVE RADIO':''}</span></div>
             <h2>{current?.title||'Zubeen Radio'}</h2>
-            <p>{current?.artist||'Add songs from Admin'} {current?.year&&<><b>•</b> {current.year}</>}</p>
+            <p>{current?.artist||'Automatic radio catalog'} {current?.year&&<><b>•</b> {current.year}</>}</p>
             <div className="meta-line">{current?.audioUrl?'DIRECT MP3':'YOUTUBE VIDEO'} <span>•</span> {current?.category||rotation.title}</div>
 
             <div className="timeline">
