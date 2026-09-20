@@ -1,13 +1,31 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#24170f" />
-    <title>Zubeen Player</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>
+<html lang="as">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1c100d"><title>Zubeen Radio — 24/7</title>
+<link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="bg"></div><div class="shade"></div>
+<header><div><b id="clock">--:--</b><small id="date">--</small></div><div class="onair"><i></i> ON AIR • ZUBEEN RADIO</div><nav><a href="/schedule.html">Schedule</a><a href="/admin.html">Admin</a></nav></header>
+<main>
+  <div class="listen">● <span id="listeners">1</span> LISTENING NOW</div>
+  <section class="hero"><div class="orb">◉</div><h1>জুবিন দা ৰেডিঅ'</h1><div class="sub">ZUBEEN RADIO</div>
+    <div class="card">
+      <div class="video"><div id="yt"></div><div id="cover" class="cover">ZG</div><div class="video-label">YOUTUBE • OFFICIAL EMBED</div></div>
+      <div class="info"><div class="eyebrow">NOW PLAYING</div><h2 id="title">Loading song…</h2><p id="artist">Zubeen Garg</p><div id="meta" class="meta">Automatic radio • YouTube video</div>
+        <div class="timeline"><span id="cur">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="dur">0:00</span></div>
+        <div class="controls"><button id="prev">◀</button><button id="play" class="play">▶</button><button id="next">▶</button><div class="wave" id="wave">▂▅▇▃▆▂▇▅</div><input id="vol" class="vol" type="range" min="0" max="100" value="85"></div>
+        <div class="actions"><button id="bgBtn">◒ BACKGROUND</button><span id="status">AUTO RADIO</span></div>
+      </div>
+    </div>
+    <div id="notice" class="notice">Radio loading…</div>
+    <div class="strip"><b id="rotation">Assamese Modern Classics</b><span>• ON AIR</span><em id="remaining">AUTO</em></div>
+  </section>
+  <section class="below"><div><div class="section-head"><h2>Up next</h2><small id="count">0 tracks</small></div><div id="tracks"></div></div><div><div class="section-head"><h2>Today</h2><a href="/schedule.html">Full schedule →</a></div><div id="schedule"></div></div></section>
+</main>
+<footer>FIVE ROTATIONS • AUTOMATIC SONG DISCOVERY • YOUTUBE FALLBACK • LIVE LISTENER COUNT</footer>
+<script src="https://www.youtube.com/iframe_api"></script><script src="/app.js"></script>
+</body></html>

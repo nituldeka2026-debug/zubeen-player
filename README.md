@@ -1,31 +1,21 @@
-# Zubeen Radio — automatic YouTube/MP3 radio
+# Zubeen Radio 3.0 — Render ready
 
-This build follows the supplied Zubeen Radio screenshots: cinematic home player, five daily rotations, schedule page, live listener counter, and a centered Now Playing card.
+## Why the old ZIP did not play
+The previous build could start with an empty catalog (`youtubeId: ""`). The UI then showed the player, but there was no actual playable media queued. It also depended on the YouTube Data API before it had a guaranteed fallback.
 
-## Automatic song selection
+## What this version changes
+- No Vite/build step. Render can run `node server.js` directly.
+- The player uses the official YouTube IFrame Player API.
+- Three real Zubeen Garg Official Artist Channel videos are seeded as playable fallbacks.
+- A first user click on Play starts the YouTube video (browser autoplay restrictions are respected).
+- If a video returns a YouTube playback error, the radio automatically moves to the next song.
+- If `YOUTUBE_API_KEY` is set on Render, the server automatically searches embeddable Zubeen Garg videos and adds them to the current rotation.
+- Listener heartbeat is included.
+- Schedule and Admin pages are included.
 
-No manual song adding is required for normal operation. When a rotation has fewer than 6 playable songs, the Render backend automatically searches YouTube Data API v3 for that rotation, keeps public embeddable/syndicated videos that match Zubeen, and stores them in `data/catalog.json`. The current rotation is synced on first load and whenever the clock enters a new rotation.
+## Render settings
+Build Command: leave empty.
+Start Command: `node server.js`
+Environment Variable: `YOUTUBE_API_KEY` = your YouTube Data API v3 key.
 
-The five automatic search groups are:
-- Borgeet, Lokgeet & Bhakti
-- Bihu & High Energy
-- Assamese Modern Classics
-- Bollywood Nostalgia
-- Midnight Melodies
-
-## Playback
-
-- If a catalog item has an authorized direct MP3 URL, HTML5 audio is used.
-- If no MP3 URL exists, the official YouTube IFrame Player is used so the video can be visible inside the radio card.
-- The app does not extract or download MP3 from YouTube.
-- Browser autoplay policies may require the user to press Play once; after playback starts, the next song is selected automatically.
-
-## Render
-
-Environment variable:
-`YOUTUBE_API_KEY=your_youtube_data_api_v3_key`
-
-Build command: `npm install && npm run build`
-Start command: `npm start`
-
-The admin page remains available for optional maintenance/manual authorized MP3 entries, but it is not required for the automatic radio flow.
+After deploy, open the site and press the round Play button once. The video will then play inside the radio player.
