@@ -5,7 +5,7 @@ const ROTATIONS=[
  {s:1020,e:1260,name:'Bollywood Nostalgia',as:'বলিউড নষ্টালজিয়া',desc:'The playback years and Hindi favourites.'},
  {s:1260,e:1440,name:'Midnight Melodies',as:'মাজনিশাৰ সুৰ',desc:'Slow, soulful and unhurried.'}
 ];
-let songs=[], currentIndex=0, current=null, player=null, playerReady=false, playing=false, session=localStorage.getItem('zubeen_sid')||crypto.randomUUID();
+let songs=[], currentIndex=0, current=null, player=null, playerReady=false, playing=false, ytApiFailed=false, session=localStorage.getItem('zubeen_sid')||crypto.randomUUID();
 localStorage.setItem('zubeen_sid',session);
 const $=id=>document.getElementById(id);
 function now(){const d=new Date(),m=d.getHours()*60+d.getMinutes();return {d,m,r:ROTATIONS.find(r=>m>=r.s&&m<r.e)||ROTATIONS[4]};}
@@ -16,13 +16,38 @@ function tick(){const x=now(),d=x.d;$('clock').textContent=d.toLocaleTimeString(
 function renderSchedule(active){$('schedule').innerHTML=ROTATIONS.map(r=>`<div class="srow ${r.name===active.name?'active':''}"><b>${r.s/60|0}:00–${r.e===1440?'00:00':String(r.e/60|0).padStart(2,'0')}:00</b><span>${esc(r.name)}<small>${esc(r.as)}</small></span>${r.name===active.name?'<i>● ON AIR</i>':''}</div>`).join('');}
 async function bootstrap(){const cat=now().r.name;notice('Automatic song search running…');try{const r=await fetch('/api/radio/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:cat})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Radio server error');songs=d.items||[];songs=songs.filter(s=>s.youtubeId||s.audioUrl);$('count').textContent=`${songs.length} tracks`;if(!songs.length)throw new Error('No playable songs returned');currentIndex=0;select(0,false);renderTracks();notice(d.api?'YouTube automatic discovery active.':'Radio ready — built-in YouTube fallback active.',true);}catch(e){notice(e.message||'Radio load failed');}}
 function renderTracks(){const cat=now().r.name;const list=songs.filter(s=>s.category===cat);const use=list.length?list:songs;$('tracks').innerHTML=use.slice(0,10).map((s,i)=>`<div class="track ${s.id===current?.id?'current':''}" data-id="${esc(s.id)}"><span>${String(i+1).padStart(2,'0')}</span><img src="${esc(s.thumbnail||'https://i.ytimg.com/vi/'+s.youtubeId+'/hqdefault.jpg')}" onerror="this.style.display='none'"><b>${esc(s.title)}<small>${esc(s.artist||'Zubeen Garg')} • ${esc(s.year||'—')}</small></b><em>${s.id===current?.id?'● ON AIR':'▶'}</em></div>`).join('');document.querySelectorAll('.track').forEach(el=>el.onclick=()=>select(songs.findIndex(s=>s.id===el.dataset.id),false));}
-function select(i,auto){if(!songs.length)return;i=(i+songs.length)%songs.length;currentIndex=i;current=songs[i];$('title').textContent=current.title;$('artist').textContent=current.artist||'Zubeen Garg';$('meta').textContent=`${current.category||'Radio'} • ${current.year||'—'} • ${current.source==='youtube-api'?'YouTube API':'YouTube'}`;$('cover').style.backgroundImage=current.thumbnail?`url("${current.thumbnail}")`:'';$('cover').classList.toggle('has',!!current.thumbnail);$('cover').textContent=current.thumbnail?'':'ZG';renderTracks();if(current.audioUrl){notice('Direct audio source selected.',true);return;}if(playerReady&&player&&current.youtubeId){player.cueVideoById(current.youtubeId);if(auto)setTimeout(()=>player.playVideo(),250);}}
+function showDirectEmbed(id,autoplay=false){
+  const box=$('yt');
+  if(!id){box.innerHTML='';return;}
+  const src=`https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=${autoplay?1:0}&controls=1&rel=0&playsinline=1&modestbranding=1&origin=${encodeURIComponent(location.origin)}`;
+  box.innerHTML=`<iframe id="ytDirect" title="Zubeen Radio YouTube Player" src="${src}" style="width:100%;height:100%;border:0;display:block" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  playerReady=false; playing=autoplay; $('play').textContent=autoplay?'Ⅱ':'▶';
+}
+function select(i,auto){if(!songs.length)return;i=(i+songs.length)%songs.length;currentIndex=i;current=songs[i];$('title').textContent=current.title;$('artist').textContent=current.artist||'Zubeen Garg';$('meta').textContent=`${current.category||'Radio'} • ${current.year||'—'} • ${current.source==='youtube-api'?'YouTube API':'YouTube'}`;$('cover').style.backgroundImage=current.thumbnail?`url("${current.thumbnail}")`:'';$('cover').classList.toggle('has',!!current.thumbnail);$('cover').textContent=current.thumbnail?'':'ZG';renderTracks();if(current.audioUrl){notice('Direct audio source selected.',true);return;}if(playerReady&&player&&current.youtubeId){player.loadVideoById(current.youtubeId);if(!auto)player.pauseVideo();return;}if(ytApiFailed||!window.YT){showDirectEmbed(current.youtubeId,auto);if(auto)notice('Playing on YouTube.');}}
 function next(){if(!songs.length)return;select(currentIndex+1,true);}
 function prev(){if(!songs.length)return;select(currentIndex-1,false);}
-function toggle(){if(!playerReady||!player){notice('YouTube player loading…');return;}if(playing)player.pauseVideo();else {player.playVideo();notice('Playing • click again to pause',true);}}
-function onYTReady(){player=new YT.Player('yt',{width:'100%',height:'100%',videoId:'',playerVars:{controls:1,rel:0,playsinline:1,origin:location.origin},events:{onReady:()=>{playerReady=true;if(current?.youtubeId)player.cueVideoById(current.youtubeId);},onStateChange:e=>{if(e.data===YT.PlayerState.PLAYING){playing=true;$('play').textContent='Ⅱ';$('wave').classList.add('live');}else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.CUED){playing=false;$('play').textContent='▶';$('wave').classList.remove('live');}else if(e.data===YT.PlayerState.ENDED){playing=false;next();}},onError:e=>{playing=false;$('play').textContent='▶';notice(`This YouTube video cannot play here (error ${e.data}). Trying next song…`);setTimeout(next,700);}}});}
+function toggle(){
+  if(playerReady&&player){if(playing)player.pauseVideo();else {player.playVideo();notice('Playing • click again to pause',true);}return;}
+  const frame=document.getElementById('ytDirect');
+  if(frame){
+    const cmd=playing?'pauseVideo':'playVideo';
+    frame.contentWindow.postMessage(JSON.stringify({event:'command',func:cmd,args:[]}), 'https://www.youtube.com');
+    playing=!playing;$('play').textContent=playing?'Ⅱ':'▶';notice(playing?'Playing on YouTube.':'Paused.',true);return;
+  }
+  notice('YouTube player loading…');
+}
+function onYTReady(){
+  try{
+    player=new YT.Player('yt',{width:'100%',height:'100%',videoId:'',playerVars:{controls:1,rel:0,playsinline:1,origin:location.origin},events:{onReady:()=>{playerReady=true;if(current?.youtubeId)player.cueVideoById(current.youtubeId);},onStateChange:e=>{if(e.data===YT.PlayerState.PLAYING){playing=true;$('play').textContent='Ⅱ';$('wave').classList.add('live');}else if(e.data===YT.PlayerState.PAUSED||e.data===YT.PlayerState.CUED){playing=false;$('play').textContent='▶';$('wave').classList.remove('live');}else if(e.data===YT.PlayerState.ENDED){playing=false;next();}},onError:e=>{playing=false;$('play').textContent='▶';notice(`YouTube video cannot play here (error ${e.data}). Trying next song…`);setTimeout(next,700);}}});
+  }catch(e){console.error('YouTube IFrame API init failed',e);ytApiFailed=true;if(current?.youtubeId)showDirectEmbed(current.youtubeId,false);}
+}
 window.onYouTubeIframeAPIReady=onYTReady;
+function loadYTApi(){
+  if(window.YT?.Player){onYTReady();return;}
+  const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;s.onerror=()=>{ytApiFailed=true;if(current?.youtubeId)showDirectEmbed(current.youtubeId,false);notice('YouTube API could not load. Direct YouTube player enabled.',true);};document.head.appendChild(s);
+  setTimeout(()=>{if(!playerReady&&!window.YT?.Player){ytApiFailed=true;if(current?.youtubeId)showDirectEmbed(current.youtubeId,false);notice('YouTube API is unavailable here. Direct YouTube player enabled.',true);}},7000);
+}
 $('play').onclick=toggle;$('next').onclick=next;$('prev').onclick=prev;$('vol').oninput=e=>{if(player?.setVolume)player.setVolume(Number(e.target.value));};$('bgBtn').onclick=()=>{document.body.classList.toggle('no-bg');};
 setInterval(tick,1000);tick();
 setInterval(async()=>{try{const r=await fetch('/api/listeners/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:session})});const d=await r.json();$('listeners').textContent=d.listeners||1;}catch{}},20000);
-(async()=>{await bootstrap();if(playerReady&&current?.youtubeId)player.cueVideoById(current.youtubeId);})();
+(async()=>{await bootstrap();loadYTApi();if(ytApiFailed&&current?.youtubeId)showDirectEmbed(current.youtubeId,false);})();
