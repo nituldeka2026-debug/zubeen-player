@@ -10,11 +10,11 @@ const DATA_DIR = path.join(ROOT, 'data');
 const CATALOG_FILE = path.join(DATA_DIR, 'catalog.json');
 
 const ROTATIONS = [
-  ['Borgeet, Lokgeet & Bhakti','Zubeen Garg borgeet lokgeet bhakti Assamese songs'],
-  ['Bihu & High Energy','Zubeen Garg Bihu Assamese songs'],
-  ['Assamese Modern Classics','Zubeen Garg Assamese modern songs'],
-  ['Bollywood Nostalgia','Zubeen Garg Bollywood Hindi songs'],
-  ['Midnight Melodies','Zubeen Garg romantic Assamese songs']
+  ['Prabhat — Zubeen Morning','Zubeen Garg borgeet lokgeet bhakti Assamese songs'],
+  ['Bihu Beats','Zubeen Garg Bihu Assamese songs'],
+  ['Zubeen Classics','Zubeen Garg Assamese modern songs'],
+  ['Evening Memories','Zubeen Garg Bollywood Hindi songs'],
+  ['Midnight Zubeen','Zubeen Garg romantic Assamese songs']
 ];
 
 // These are real YouTube videos from Zubeen Garg's Official Artist Channel found during setup.
@@ -99,6 +99,14 @@ async function autoSync(category){
 const listeners=new Map();
 // Global station state: every visitor receives the same song and playback position.
 const station = new Map();
+const history = new Map();
+function pushHistory(category, song, duration){
+  if(!song) return;
+  const key=stationKey(category);
+  const list=history.get(key)||[];
+  list.unshift({...song,duration:Number(duration||song.duration||0),playedAt:Date.now()});
+  history.set(key,list.slice(0,20));
+}
 function stationKey(category){ return category || rotationForNow(); }
 function stationItems(category){
   const key=stationKey(category);
@@ -112,6 +120,7 @@ function getStation(category, items){
     const first=items[0];
     st={songId:first?.id||null,startedAt:Date.now(),revision:1,duration:Number(first?.duration||0)};
     station.set(key,st);
+    if(first) pushHistory(key,first,st.duration);
   }
   let song=items.find(x=>x.id===st.songId) || items[0];
   if(song && song.id!==st.songId){
@@ -124,7 +133,7 @@ function getStation(category, items){
     const idx=Math.max(0,items.findIndex(x=>x.id===song.id));
     const next=items[(idx+1)%items.length];
     st={songId:next.id,startedAt:Date.now(),revision:(st.revision||0)+1,duration:Number(next.duration||0)};
-    station.set(key,st); song=next; elapsed=0;
+    station.set(key,st); pushHistory(key,next,st.duration); song=next; elapsed=0;
   }
   return {category:key,song,startedAt:st.startedAt,serverNow:Date.now(),position:elapsed,duration:Number(st.duration||song?.duration||0),revision:st.revision};
 }
@@ -142,7 +151,7 @@ function advanceStation(category){
   const idx=Math.max(0,items.findIndex(x=>x.id===current.song.id));
   const next=items[(idx+1)%items.length];
   const st={songId:next.id,startedAt:Date.now(),revision:(current.revision||0)+1,duration:Number(next.duration||0)};
-  station.set(key,st);
+  station.set(key,st); pushHistory(key,next,st.duration);
   return getStation(key,items);
 }
 setInterval(()=>{const now=Date.now();for(const [id,t] of listeners)if(now-t>45000)listeners.delete(id);},15000).unref();
@@ -173,6 +182,11 @@ const server=http.createServer(async (req,res)=>{
       const q=clean(u.searchParams.get('q'),180); if(!q)return json(res,200,{items:[]});
       if(!API_KEY)return json(res,503,{error:'YOUTUBE_API_KEY is not configured on Render.'});
       return json(res,200,{items:await youtubeSearch(q)});
+    }
+    if(req.method==='GET' && u.pathname==='/api/radio/history'){
+      const cat=clean(u.searchParams.get('category'),100)||rotationForNow();
+      const items=(history.get(cat)||[]).filter(x=>x);
+      return json(res,200,{items:items.slice(0,20)});
     }
     if(req.method==='GET' && u.pathname==='/api/radio/state'){
       const cat=clean(u.searchParams.get('category'),100)||rotationForNow();

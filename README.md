@@ -1,29 +1,26 @@
-# Zubeen Radio 3.0 — Render ready
+# Zubeen Radio 4.2
 
-## Why the old ZIP did not play
-The previous build could start with an empty catalog (`youtubeId: ""`). The UI then showed the player, but there was no actual playable media queued. It also depended on the YouTube Data API before it had a guaranteed fallback.
+A cinematic, synchronized Zubeen Radio web station built on the working 4.x global timeline engine.
 
-## What this version changes
-- No Vite/build step. Render can run `node server.js` directly.
-- The player uses the official YouTube IFrame Player API.
-- Three real Zubeen Garg Official Artist Channel videos are seeded as playable fallbacks.
-- A first user click on Play starts the YouTube video (browser autoplay restrictions are respected).
-- If a video returns a YouTube playback error, the radio automatically moves to the next song.
-- If `YOUTUBE_API_KEY` is set on Render, the server automatically searches embeddable Zubeen Garg videos and adds them to the current rotation.
-- Listener heartbeat is included.
-- Schedule and Admin pages are included.
+## 4.2 changes
+- New TUNE IN entry screen inspired by the supplied radio screenshots.
+- Prominent live clock, day/date and IST station clock.
+- New five-show program system:
+  - 00:00–05:00 Prabhat — Zubeen Morning
+  - 05:00–09:00 Bihu Beats
+  - 09:00–17:00 Zubeen Classics
+  - 17:00–22:00 Evening Memories
+  - 22:00–00:00 Midnight Zubeen
+- Redesigned main live player with album art, Now Playing, live status, current/next show and station actions.
+- Recently Played station history endpoint/UI.
+- Live progress/time bar fixed and updated continuously from the YouTube IFrame API or synchronized station clock.
+- Seeking remains locked so listeners cannot change the global timeline.
+- Existing global server-side song synchronization is preserved.
+- YouTube Data API v3 automatic discovery remains supported.
 
-## Render settings
-Build Command: leave empty.
+## Render
+Build Command: `npm install`
 Start Command: `node server.js`
-Environment Variable: `YOUTUBE_API_KEY` = your YouTube Data API v3 key.
+Environment variable: `YOUTUBE_API_KEY` (optional; fallback catalogue still works)
 
-After deploy, open the site and press the round Play button once. The video will then play inside the radio player.
-
-
-## 4.0 Global Live Radio
-- Song selection is locked for listeners. Next/Previous and track clicks cannot change the station.
-- The server owns the station clock and song timeline.
-- Every listener syncs to the server timeline using server timestamps.
-- YouTube duration is reported to the server when available so song changes happen automatically for everyone.
-- Listeners may press Listen to join the live stream, but cannot pause/seek/change the station timeline.
+Node: 18+
