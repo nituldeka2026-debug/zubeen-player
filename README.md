@@ -1,24 +1,29 @@
-# Zubeen Radio Player
+# Zubeen Radio — YouTube Video Radio v3
 
-A redesigned Zubeen Radio experience based on the two reference screenshots supplied by the project owner: cinematic radio home/player + five-part daily schedule.
+This version is a real working radio-style web app, not an MP3 extractor.
 
-## Included
-- Zubeen Radio-style home screen
-- Now Playing card with cover art
-- Official YouTube IFrame Player API playback using video IDs
-- Play/pause/next/previous
-- Auto-radio and rotation-aware Up Next
-- Five-part daily schedule page
-- Admin catalog page for adding YouTube video IDs
-- Mobile responsive layout
-- No YouTube-to-MP3 extraction
+## What it does
+- Official YouTube IFrame Player API for video playback.
+- YouTube Data API v3 search from the Admin page.
+- Search results are limited to public + embeddable videos.
+- Server-side catalog so all visitors use the same song list.
+- Five clock-based rotations like the reference design.
+- Real active-listener heartbeat counter (server memory; resets on restart).
+- Admin page can add/remove YouTube videos from the radio catalog.
 
-## Run
-npm install
-npm run dev
+## Render
+Build command:
+`npm install && npm run build`
 
-## Deployment
-This remains a Vite app. Keep the existing Render static-site build configuration if that is how the current project is deployed. Build command: `npm run build`. Publish directory: `dist`.
+Start command:
+`npm start`
 
-## YouTube
-Use only videos that are publicly playable and embeddable. The app does not download or extract audio from YouTube.
+Environment variable:
+`YOUTUBE_API_KEY=YOUR_KEY`
+
+Do NOT put the YouTube key in frontend code.
+
+## Important
+YouTube Data API provides metadata/video IDs. Playback uses the official embedded YouTube player. This project does not download, extract, or convert YouTube videos into MP3/audio URLs.
+
+The catalog is stored in `data/catalog.json`. On Render, the default filesystem can be ephemeral; use a persistent disk or a database later if you need catalog changes to survive every service restart.
