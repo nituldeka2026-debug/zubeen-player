@@ -1,22 +1,31 @@
-# Zubeen Radio — Screenshot-style radio player
+# Zubeen Radio — automatic YouTube/MP3 radio
 
-This version is built around the two reference screenshots:
-- cinematic dark/brown radio home screen
-- five-part daily schedule screen
+This build follows the supplied Zubeen Radio screenshots: cinematic home player, five daily rotations, schedule page, live listener counter, and a centered Now Playing card.
 
-## Playback rule
-1. If a catalog item has an authorized `audioUrl`, the player uses HTML5 MP3/audio.
-2. If there is no MP3 but a YouTube `youtubeId`, the YouTube video is shown and played in the main media card.
-3. No YouTube MP3 extraction/downloading is used.
+## Automatic song selection
 
-## YouTube API v3
-Set this on Render as an environment variable:
-`YOUTUBE_API_KEY=your_key`
+No manual song adding is required for normal operation. When a rotation has fewer than 6 playable songs, the Render backend automatically searches YouTube Data API v3 for that rotation, keeps public embeddable/syndicated videos that match Zubeen, and stores them in `data/catalog.json`. The current rotation is synced on first load and whenever the clock enters a new rotation.
 
-The Admin page searches public embeddable YouTube videos through the server. Add the selected video to a rotation.
+The five automatic search groups are:
+- Borgeet, Lokgeet & Bhakti
+- Bihu & High Energy
+- Assamese Modern Classics
+- Bollywood Nostalgia
+- Midnight Melodies
+
+## Playback
+
+- If a catalog item has an authorized direct MP3 URL, HTML5 audio is used.
+- If no MP3 URL exists, the official YouTube IFrame Player is used so the video can be visible inside the radio card.
+- The app does not extract or download MP3 from YouTube.
+- Browser autoplay policies may require the user to press Play once; after playback starts, the next song is selected automatically.
 
 ## Render
-Build: `npm install && npm run build`
-Start: `npm start`
 
-The server stores the catalog in `data/catalog.json`. For a multi-instance/production setup, move this catalog to a database.
+Environment variable:
+`YOUTUBE_API_KEY=your_youtube_data_api_v3_key`
+
+Build command: `npm install && npm run build`
+Start command: `npm start`
+
+The admin page remains available for optional maintenance/manual authorized MP3 entries, but it is not required for the automatic radio flow.

@@ -68,43 +68,85 @@ app.get('/api/listeners', (req, res) => {
   res.json({ listeners: listeners.size });
 });
 
+
+const AUTO_QUERIES = {
+  'Borgeet, Lokgeet & Bhakti': 'Zubeen Garg borgeet lokgeet bhakti Assamese songs',
+  'Bihu & High Energy': 'Zubeen Garg Bihu Assamese songs',
+  'Assamese Modern Classics': 'Zubeen Garg Assamese modern songs',
+  'Bollywood Nostalgia': 'Zubeen Garg Bollywood Hindi songs',
+  'Midnight Melodies': 'Zubeen Garg romantic Assamese songs'
+};
+
+async function youtubeSearchItems(q) {
+  if (!API_KEY) throw new Error('YOUTUBE_API_KEY is not configured on Render.');
+  const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+  searchUrl.search = new URLSearchParams({
+    part: 'snippet', q, type: 'video', maxResults: '12', regionCode: 'IN',
+    videoEmbeddable: 'true', videoSyndicated: 'true', key: API_KEY
+  });
+  const searchResp = await fetch(searchUrl);
+  const searchData = await searchResp.json();
+  if (!searchResp.ok) throw new Error(searchData.error?.message || 'YouTube search failed.');
+  const ids = (searchData.items || []).map(x => x.id?.videoId).filter(Boolean);
+  if (!ids.length) return [];
+
+  const detailsUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
+  detailsUrl.search = new URLSearchParams({ part: 'snippet,status,contentDetails', id: ids.join(','), key: API_KEY });
+  const detailsResp = await fetch(detailsUrl);
+  const detailsData = await detailsResp.json();
+  if (!detailsResp.ok) throw new Error(detailsData.error?.message || 'YouTube details failed.');
+
+  return (detailsData.items || [])
+    .filter(v => v.status?.privacyStatus === 'public' && v.status?.embeddable !== false)
+    .map(v => ({
+      id: v.id,
+      title: v.snippet?.title || '',
+      channelTitle: v.snippet?.channelTitle || 'Zubeen Garg',
+      thumbnail: v.snippet?.thumbnails?.high?.url || v.snippet?.thumbnails?.medium?.url || '',
+      publishedAt: v.snippet?.publishedAt || '',
+      duration: v.contentDetails?.duration || ''
+    }));
+}
+
+app.post('/api/radio/auto-sync', async (req, res) => {
+  try {
+    const category = cleanText(req.body?.category, 100);
+    if (!AUTO_QUERIES[category]) return res.status(400).json({ error: 'Unknown radio category.' });
+    const catalog = readCatalog();
+    const existingIds = new Set(catalog.map(s => s.youtubeId).filter(Boolean));
+    const existingForCategory = catalog.filter(s => s.enabled !== false && s.category === category && (s.youtubeId || s.audioUrl));
+    if (existingForCategory.length >= 6) return res.json({ added: 0, items: existingForCategory, skipped: true });
+
+      const results = await youtubeSearchItems(AUTO_QUERIES[category]);
+    const selected = results
+      .filter(x => !existingIds.has(x.id))
+      .filter(x => /zubeen|জুবিন/i.test(`${x.title} ${x.channelTitle}`))
+      .slice(0, 6);
+    for (const x of selected) {
+      catalog.push({
+        id: crypto.randomUUID(), title: x.title, artist: x.channelTitle || 'Zubeen Garg',
+        year: (x.publishedAt || '').slice(0, 4) || '—', category, youtubeId: x.id,
+        audioUrl: '', thumbnail: x.thumbnail, enabled: true, source: 'youtube-auto'
+      });
+      existingIds.add(x.id);
+    }
+    writeCatalog(catalog);
+    res.json({ added: selected.length, items: catalog.filter(s => s.enabled !== false && s.category === category && (s.youtubeId || s.audioUrl)) });
+  } catch (e) {
+    console.error('Auto-sync failed:', e);
+    res.status(500).json({ error: e.message || 'Automatic YouTube sync failed.' });
+  }
+});
+
 app.get('/api/youtube/search', async (req, res) => {
   try {
-    if (!API_KEY) return res.status(503).json({ error: 'YOUTUBE_API_KEY is not configured on Render.' });
     const q = cleanText(req.query.q, 180);
     if (!q) return res.json({ items: [] });
-
-    const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
-    searchUrl.search = new URLSearchParams({
-      part: 'snippet', q, type: 'video', maxResults: '20', regionCode: 'IN', videoEmbeddable: 'true', key: API_KEY
-    });
-    const searchResp = await fetch(searchUrl);
-    const searchData = await searchResp.json();
-    if (!searchResp.ok) return res.status(searchResp.status).json({ error: searchData.error?.message || 'YouTube search failed.' });
-
-    const ids = (searchData.items || []).map(x => x.id?.videoId).filter(Boolean);
-    if (!ids.length) return res.json({ items: [] });
-
-    const detailsUrl = new URL('https://www.googleapis.com/youtube/v3/videos');
-    detailsUrl.search = new URLSearchParams({ part: 'snippet,status,contentDetails', id: ids.join(','), key: API_KEY });
-    const detailsResp = await fetch(detailsUrl);
-    const detailsData = await detailsResp.json();
-    if (!detailsResp.ok) return res.status(detailsResp.status).json({ error: detailsData.error?.message || 'YouTube details failed.' });
-
-    const items = (detailsData.items || [])
-      .filter(v => v.status?.privacyStatus === 'public' && v.status?.embeddable !== false)
-      .map(v => ({
-        id: v.id,
-        title: v.snippet?.title || '',
-        channelTitle: v.snippet?.channelTitle || '',
-        thumbnail: v.snippet?.thumbnails?.high?.url || v.snippet?.thumbnails?.medium?.url || '',
-        publishedAt: v.snippet?.publishedAt || '',
-        duration: v.contentDetails?.duration || ''
-      }));
+    const items = await youtubeSearchItems(q);
     res.json({ items });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: 'Server error while searching YouTube.' });
+    res.status(500).json({ error: e.message || 'Server error while searching YouTube.' });
   }
 });
 
