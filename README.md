@@ -1,29 +1,22 @@
-# Zubeen Radio — YouTube Video Radio v3
+# Zubeen Radio — Screenshot-style radio player
 
-This version is a real working radio-style web app, not an MP3 extractor.
+This version is built around the two reference screenshots:
+- cinematic dark/brown radio home screen
+- five-part daily schedule screen
 
-## What it does
-- Official YouTube IFrame Player API for video playback.
-- YouTube Data API v3 search from the Admin page.
-- Search results are limited to public + embeddable videos.
-- Server-side catalog so all visitors use the same song list.
-- Five clock-based rotations like the reference design.
-- Real active-listener heartbeat counter (server memory; resets on restart).
-- Admin page can add/remove YouTube videos from the radio catalog.
+## Playback rule
+1. If a catalog item has an authorized `audioUrl`, the player uses HTML5 MP3/audio.
+2. If there is no MP3 but a YouTube `youtubeId`, the YouTube video is shown and played in the main media card.
+3. No YouTube MP3 extraction/downloading is used.
+
+## YouTube API v3
+Set this on Render as an environment variable:
+`YOUTUBE_API_KEY=your_key`
+
+The Admin page searches public embeddable YouTube videos through the server. Add the selected video to a rotation.
 
 ## Render
-Build command:
-`npm install && npm run build`
+Build: `npm install && npm run build`
+Start: `npm start`
 
-Start command:
-`npm start`
-
-Environment variable:
-`YOUTUBE_API_KEY=YOUR_KEY`
-
-Do NOT put the YouTube key in frontend code.
-
-## Important
-YouTube Data API provides metadata/video IDs. Playback uses the official embedded YouTube player. This project does not download, extract, or convert YouTube videos into MP3/audio URLs.
-
-The catalog is stored in `data/catalog.json`. On Render, the default filesystem can be ephemeral; use a persistent disk or a database later if you need catalog changes to survive every service restart.
+The server stores the catalog in `data/catalog.json`. For a multi-instance/production setup, move this catalog to a database.

@@ -12,9 +12,9 @@ const CATALOG_FILE = path.join(DATA_DIR, 'catalog.json');
 app.use(express.json({ limit: '1mb' }));
 
 const DEFAULT_CATALOG = [
-  { id: 'seed-1', title: 'Phoolate Bohagare', artist: 'Zubeen Garg', year: '2022', category: 'Bihu & High Energy', youtubeId: '', thumbnail: '', enabled: true },
-  { id: 'seed-2', title: 'Mayabini', artist: 'Zubeen Garg', year: '—', category: 'Assamese Modern Classics', youtubeId: '', thumbnail: '', enabled: true },
-  { id: 'seed-3', title: 'Monole Ubhoti Ahe', artist: 'Zubeen Garg', year: '—', category: 'Assamese Modern Classics', youtubeId: '', thumbnail: '', enabled: true }
+  { id: 'seed-1', title: 'Phoolate Bohagare', artist: 'Zubeen Garg', year: '2022', category: 'Bihu & High Energy', youtubeId: '', audioUrl: '', thumbnail: '', enabled: true },
+  { id: 'seed-2', title: 'Mayabini', artist: 'Zubeen Garg', year: '—', category: 'Assamese Modern Classics', youtubeId: '', audioUrl: '', thumbnail: '', enabled: true },
+  { id: 'seed-3', title: 'Monole Ubhoti Ahe', artist: 'Zubeen Garg', year: '—', category: 'Assamese Modern Classics', youtubeId: '', audioUrl: '', thumbnail: '', enabled: true }
 ];
 
 function ensureCatalogFile() {
@@ -51,7 +51,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/songs', (req, res) => {
   const category = cleanText(req.query.category, 100);
-  const all = readCatalog().filter(s => s.enabled !== false && s.youtubeId);
+  const all = readCatalog().filter(s => s.enabled !== false && (s.audioUrl || s.youtubeId));
   res.json({ items: category ? all.filter(s => s.category === category) : all });
 });
 
@@ -112,13 +112,14 @@ app.post('/api/admin/songs', (req, res) => {
   const b = req.body || {};
   const youtubeId = cleanText(b.youtubeId, 30);
   const title = cleanText(b.title, 180);
-  if (!youtubeId || !title) return res.status(400).json({ error: 'title and youtubeId are required' });
+  const audioUrl = cleanText(b.audioUrl, 1000);
+  if (!youtubeId && !audioUrl || !title) return res.status(400).json({ error: 'title and either youtubeId or audioUrl are required' });
   const catalog = readCatalog();
   if (catalog.some(s => s.youtubeId === youtubeId)) return res.status(409).json({ error: 'This YouTube video is already in the catalog.' });
   const song = {
     id: crypto.randomUUID(), title, artist: cleanText(b.artist, 120) || 'Zubeen Garg',
     year: cleanText(b.year, 20) || '—', category: cleanText(b.category, 100) || 'Assamese Modern Classics',
-    youtubeId, thumbnail: cleanText(b.thumbnail, 500), enabled: true
+    youtubeId, audioUrl: cleanText(b.audioUrl, 1000), thumbnail: cleanText(b.thumbnail, 500), enabled: true
   };
   catalog.push(song); writeCatalog(catalog); res.json({ song });
 });
