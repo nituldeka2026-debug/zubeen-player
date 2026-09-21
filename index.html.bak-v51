@@ -34,19 +34,11 @@
   <section class="live-panel">
     <div class="program-line"><span>● ON AIR</span><b id="programName">EVENING MEMORIES</b><small id="programRemain">--</small></div>
     <div class="player-grid">
-      <div class="video-side">
-        <div class="art-stage">
-          <div id="yt"></div><audio id="radioAudio" preload="none" playsinline></audio>
-          <div id="cover" class="cover">ZG</div>
-          <div class="art-vignette"></div>
-          <div class="art-badge">LIVE RADIO</div>
-        </div>
-        <section class="side-video-library" aria-label="Zubeen YouTube videos">
-          <div class="side-video-head"><span class="kicker">YOUTUBE</span><span id="videoCount" class="video-count">-- VIDEOS</span></div>
-          <div id="videoList" class="video-list">
-            <div class="video-empty">Loading Zubeen videos…</div>
-          </div>
-        </section>
+      <div class="art-stage">
+        <div id="yt"></div><audio id="radioAudio" preload="none" playsinline></audio>
+        <div id="cover" class="cover">ZG</div>
+        <div class="art-vignette"></div>
+        <div class="art-badge">LIVE RADIO</div>
       </div>
       <div class="now-card">
         <div class="eyebrow">NOW PLAYING</div>
@@ -61,6 +53,18 @@
         <div class="actions"><button id="bgBtn">◒ BACKGROUND</button><button id="screenBtn">▣ SCREEN ON</button><a href="https://open.spotify.com/search/Zubeen%20Garg" target="_blank" rel="noreferrer">SPOTIFY ↗</a><a href="https://music.youtube.com/search?q=Zubeen%20Garg" target="_blank" rel="noreferrer">YT MUSIC ↗</a></div>
       </div>
     </div>
+    <section class="video-rail" aria-label="Zubeen YouTube videos">
+      <div class="video-rail-head">
+        <div>
+          <span class="kicker">YOUTUBE RADIO LIBRARY</span>
+          <h3>Zubeen Videos</h3>
+        </div>
+        <span id="videoCount" class="video-count">-- VIDEOS</span>
+      </div>
+      <div id="videoList" class="video-list">
+        <div class="video-empty">Loading Zubeen video list…</div>
+      </div>
+    </section>
   </section>
   <div id="notice" class="notice">Radio loading…</div>
   <!-- Lower history / schedule / about panels removed for a cleaner 4.3 layout. -->
