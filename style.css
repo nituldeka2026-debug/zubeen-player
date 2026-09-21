@@ -511,3 +511,115 @@ button,a,input{touch-action:manipulation}
   .now-card h1{font-size:14px}
   .actions a:nth-child(n+3){display:none}
 }
+
+/* ZUBEEN RADIO — COMPACT CINEMATIC PLAYER V5
+   Inspired by the supplied radio reference: a smaller floating player card,
+   stronger artwork, tighter controls and more background visible around it. */
+.bg{
+  background-image:linear-gradient(180deg,rgba(11,7,5,.18),rgba(8,5,4,.78)),url('/assets/zubeen-bg.jpg');
+  background-size:cover;
+  background-position:center 28%;
+  background-attachment:fixed;
+  background-blend-mode:normal;
+}
+.bg:before{background:radial-gradient(circle at 50% 42%,rgba(229,155,91,.18),transparent 28%),linear-gradient(90deg,rgba(0,0,0,.18),transparent 45%,rgba(0,0,0,.35))}
+
+.live-panel{
+  width:min(780px,100%);
+  margin:0 auto;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+  backdrop-filter:none;
+}
+.program-line{
+  width:min(780px,100%);
+  margin:0 auto 9px;
+  height:30px;
+  padding:0 4px;
+  border:0;
+  font-size:6px;
+  opacity:.9;
+}
+.program-line span{color:#e66b4c}
+.program-line b{color:#d9c0b5;font-size:6px}
+.program-line small{font-size:5.5px;color:#9b877d}
+
+.player-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:190px minmax(0,1fr);
+  min-height:205px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:13px;
+  overflow:hidden;
+  background:rgba(8,7,6,.84);
+  box-shadow:0 24px 70px rgba(0,0,0,.48),0 0 0 1px rgba(255,184,105,.035) inset;
+  backdrop-filter:blur(16px);
+}
+.art-stage{
+  min-height:205px;
+  height:205px;
+  background:#0d0907;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.art-stage iframe{opacity:0;pointer-events:none}
+.cover{font-size:44px;background-color:#17100d}
+.art-vignette{background:linear-gradient(90deg,rgba(0,0,0,.02),rgba(0,0,0,.42)),linear-gradient(0deg,rgba(0,0,0,.58),transparent 55%)}
+.art-badge{left:11px;bottom:10px;padding:6px 8px;font-size:5px;background:rgba(0,0,0,.52)}
+
+.now-card{
+  min-width:0;
+  padding:24px 27px 18px;
+  justify-content:center;
+  background:linear-gradient(135deg,rgba(20,15,13,.82),rgba(8,7,6,.94));
+}
+.eyebrow{font-size:5.5px;letter-spacing:2px;color:#e7ad68}
+.now-card h1{
+  font-size:25px;
+  line-height:1.12;
+  margin:8px 0 4px;
+  max-width:510px;
+}
+.now-card>p{font-size:7px;color:#a9958b}
+.meta{font-size:5.5px;margin-top:7px;color:#766860}
+.timeline{grid-template-columns:27px minmax(0,1fr) 32px;gap:7px;margin-top:20px;font-size:5.5px}
+.timeline input{height:3px}
+.timeline-note{font-size:5px;margin-top:4px}
+.control-row{gap:10px;margin-top:10px}
+.main-play{
+  min-width:86px;
+  padding:9px 13px;
+  font-size:5.5px;
+  box-shadow:0 5px 18px rgba(0,0,0,.22);
+}
+.wave{font-size:11px;letter-spacing:1px}
+.volume{font-size:5px}
+.volume input{width:55px}
+.radio-state{margin-top:14px;padding:8px 0;font-size:5.5px}
+.show-box{grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.show-box div{padding:7px 8px;border-radius:7px}
+.show-box small{font-size:4.5px}
+.show-box strong{font-size:9px}
+.actions{gap:5px;margin-top:10px}
+.actions button,.actions a{font-size:5px;padding:6px 8px}
+.notice{width:min(780px,100%);margin:5px auto 0;font-size:5.5px;padding:5px 3px}
+
+@media(max-width:700px){
+  .bg{background-position:center top;background-attachment:scroll}
+  .live-panel{width:100%}
+  .program-line{width:100%;padding:0 3px}
+  .player-grid{grid-template-columns:1fr;min-height:0;border-radius:12px}
+  .art-stage{height:min(58vw,250px);min-height:205px;max-height:250px;border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .now-card{padding:20px 16px 15px}
+  .now-card h1{font-size:22px}
+  .timeline{margin-top:17px}
+  .show-box{grid-template-columns:1fr 1fr}
+}
+@media(max-width:430px){
+  .art-stage{height:215px}
+  .now-card h1{font-size:20px}
+  .show-box{grid-template-columns:1fr}
+  .actions a,.actions button{font-size:4.8px}
+}
