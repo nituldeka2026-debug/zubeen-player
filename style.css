@@ -512,14 +512,9 @@ button,a,input{touch-action:manipulation}
   .actions a:nth-child(n+3){display:none}
 }
 
-
-/* FINAL BACKGROUND FIX - ZUBEEN RADIO
-   Desktop uses the wide artwork; phones use the portrait artwork.
-   These rules intentionally come last so older mobile gradient rules cannot override the photos. */
+/* FINAL RADIO FIX: explicit photo backgrounds for every viewport. */
 .bg{
-  background-image:
-    linear-gradient(180deg,rgba(7,5,4,.18),rgba(7,5,4,.72)),
-    url('/assets/zubeen-bg-wide.jpg');
+  background-image:url('/assets/zubeen-bg-wide.jpg');
   background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
@@ -527,18 +522,9 @@ button,a,input{touch-action:manipulation}
 }
 @media (max-width:700px){
   .bg{
-    background-image:
-      linear-gradient(180deg,rgba(7,5,4,.10),rgba(7,5,4,.70)),
-      url('/assets/zubeen-bg.jpg');
+    background-image:url('/assets/zubeen-bg.jpg');
     background-size:cover;
     background-position:center top;
-    background-repeat:no-repeat;
     background-attachment:scroll;
-  }
-  .bg:before{
-    background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.24));
-  }
-  .bg:after{
-    background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.50));
   }
 }

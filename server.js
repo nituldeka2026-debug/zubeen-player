@@ -20,9 +20,9 @@ const ROTATIONS = [
 // These are real YouTube videos from Zubeen Garg's Official Artist Channel found during setup.
 // They make the radio playable immediately even before a YouTube API key is configured.
 const FALLBACKS = [
-  { id:'seed-mayabini', title:'Mayabini', artist:'Zubeen Garg', year:'2006', category:'Assamese Modern Classics', youtubeId:'o2uNk9lh5RU', thumbnail:'https://i.ytimg.com/vi/o2uNk9lh5RU/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
-  { id:'seed-monole', title:'Monole Ubhoti Ahe', artist:'Zubeen Garg', year:'2025', category:'Assamese Modern Classics', youtubeId:'BD-WtD3hU3M', thumbnail:'https://i.ytimg.com/vi/BD-WtD3hU3M/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
-  { id:'seed-bhed', title:'Mur Monot Bhed Bhav Nai', artist:'Zubeen Garg', year:'2021', category:'Assamese Modern Classics', youtubeId:'JMj0StLwyRc', thumbnail:'https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' }
+  { id:'seed-mayabini', title:'Mayabini', artist:'Zubeen Garg', year:'2006', category:'Assamese Modern Classics', youtubeId:'o2uNk9lh5RU', duration:324, thumbnail:'https://i.ytimg.com/vi/o2uNk9lh5RU/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
+  { id:'seed-monole', title:'Monole Ubhoti Ahe', artist:'Zubeen Garg', year:'2025', category:'Assamese Modern Classics', youtubeId:'BD-WtD3hU3M', duration:253, thumbnail:'https://i.ytimg.com/vi/BD-WtD3hU3M/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
+  { id:'seed-bhed', title:'Mur Monot Bhed Bhav Nai', artist:'Zubeen Garg', year:'2021', category:'Assamese Modern Classics', youtubeId:'JMj0StLwyRc', duration:300, thumbnail:'https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' }
 ];
 
 function ensureData(){
