@@ -559,3 +559,25 @@ header, main, footer { position: relative; z-index: 2; }
     background-attachment: scroll !important;
   }
 }
+
+
+/* FINAL BACKGROUND FIT — wide desktop composition */
+.bg {
+  background-image:
+    linear-gradient(180deg, rgba(5,7,8,.18), rgba(5,7,8,.62)),
+    url('/assets/zubeen-bg-wide.jpg') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+@media (max-width: 700px) {
+  .bg {
+    background-image:
+      linear-gradient(180deg, rgba(5,7,8,.16), rgba(5,7,8,.66)),
+      url('/assets/zubeen-bg.jpg') !important;
+    background-size: cover !important;
+    background-position: center 28% !important;
+    background-attachment: scroll !important;
+  }
+}
