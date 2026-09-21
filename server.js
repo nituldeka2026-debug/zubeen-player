@@ -20,9 +20,9 @@ const ROTATIONS = [
 // These are real YouTube videos from Zubeen Garg's Official Artist Channel found during setup.
 // They make the radio playable immediately even before a YouTube API key is configured.
 const FALLBACKS = [
-  { id:'seed-mayabini', title:'Mayabini', artist:'Zubeen Garg', year:'2006', category:'Assamese Modern Classics', youtubeId:'o2uNk9lh5RU', duration:324, thumbnail:'https://i.ytimg.com/vi/o2uNk9lh5RU/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
-  { id:'seed-monole', title:'Monole Ubhoti Ahe', artist:'Zubeen Garg', year:'2025', category:'Assamese Modern Classics', youtubeId:'BD-WtD3hU3M', duration:253, thumbnail:'https://i.ytimg.com/vi/BD-WtD3hU3M/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
-  { id:'seed-bhed', title:'Mur Monot Bhed Bhav Nai', artist:'Zubeen Garg', year:'2021', category:'Assamese Modern Classics', youtubeId:'JMj0StLwyRc', duration:300, thumbnail:'https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' }
+  { id:'seed-mayabini', title:'Mayabini', artist:'Zubeen Garg', year:'2006', duration:320, category:'Assamese Modern Classics', youtubeId:'o2uNk9lh5RU', thumbnail:'https://i.ytimg.com/vi/o2uNk9lh5RU/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
+  { id:'seed-monole', title:'Monole Ubhoti Ahe', artist:'Zubeen Garg', year:'2025', duration:300, category:'Assamese Modern Classics', youtubeId:'BD-WtD3hU3M', thumbnail:'https://i.ytimg.com/vi/BD-WtD3hU3M/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' },
+  { id:'seed-bhed', title:'Mur Monot Bhed Bhav Nai', artist:'Zubeen Garg', year:'2021', duration:300, category:'Assamese Modern Classics', youtubeId:'JMj0StLwyRc', thumbnail:'https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg', enabled:true, source:'official-youtube-fallback' }
 ];
 
 function ensureData(){
@@ -69,6 +69,16 @@ async function youtubeSearch(q){
 
 async function autoSync(category){
   let catalog=readCatalog();
+  // Keep bundled fallback metadata complete even when an older catalog.json is deployed.
+  let changed=false;
+  for(const f of FALLBACKS){
+    for(const item of catalog){
+      if(item.youtubeId===f.youtubeId && item.source==='official-youtube-fallback'){
+        if(!item.duration && f.duration){ item.duration=f.duration; changed=true; }
+      }
+    }
+  }
+  if(changed) writeCatalog(catalog);
   let current=catalog.filter(s=>s.enabled!==false && s.category===category && s.youtubeId);
   if(current.length>=3) return {items:current,added:0,api:false};
   const q=(ROTATIONS.find(x=>x[0]===category)||[])[1];
@@ -173,7 +183,7 @@ const server=http.createServer(async (req,res)=>{
     }
     if(req.method==='GET' && u.pathname==='/api/songs'){
       const cat=clean(u.searchParams.get('category'),100); const all=readCatalog().filter(s=>s.enabled!==false && (s.youtubeId||s.audioUrl));
-      return json(res,200,{items:cat?all.filter(s=>s.category===cat):all});
+      return json(res,200,{items:cat?all.filter(s=>s.category===cat).map(item=>{const f=FALLBACKS.find(x=>x.youtubeId===item.youtubeId);return f&&!item.duration?{...item,duration:f.duration}:item;}):all.map(item=>{const f=FALLBACKS.find(x=>x.youtubeId===item.youtubeId);return f&&!item.duration?{...item,duration:f.duration}:item;})});
     }
     if(req.method==='POST' && u.pathname==='/api/radio/bootstrap'){
       const b=await body(req); const category=clean(b.category,100)||rotationForNow(); const result=await autoSync(category); return json(res,200,result);
@@ -190,7 +200,12 @@ const server=http.createServer(async (req,res)=>{
     }
     if(req.method==='GET' && u.pathname==='/api/radio/state'){
       const cat=clean(u.searchParams.get('category'),100)||rotationForNow();
-      const items=readCatalog().filter(s=>s.enabled!==false && s.category===cat && (s.youtubeId||s.audioUrl));
+      let items=readCatalog().filter(s=>s.enabled!==false && s.category===cat && (s.youtubeId||s.audioUrl));
+      items=items.map(item=>{const f=FALLBACKS.find(x=>x.youtubeId===item.youtubeId);return f&&!item.duration?{...item,duration:f.duration}:item;});
+      if(!items.length){
+        const seeded=await autoSync(cat);
+        items=(seeded.items||[]).filter(s=>s.enabled!==false && (s.youtubeId||s.audioUrl));
+      }
       if(!items.length) return json(res,404,{error:'No playable songs in this rotation'});
       return json(res,200,getStation(cat,items));
     }
