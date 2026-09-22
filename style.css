@@ -324,7 +324,13 @@ button,a,input{touch-action:manipulation}
 @media (max-width: 700px){
   body{min-height:100dvh;overflow-x:hidden;background:#120b08}
   .bg{
-    background:radial-gradient(circle at 50% 30%,#7b4028 0,#3a1e16 34%,#160c09 72%,#090605 100%);
+    background-image:
+      linear-gradient(180deg,rgba(7,5,4,.20),rgba(7,5,4,.64)),
+      url('/assets/zubeen-bg.jpg');
+    background-size:cover;
+    background-position:center center;
+    background-repeat:no-repeat;
+    background-attachment:scroll;
   }
   .bg:before{
     background:radial-gradient(circle at 50% 28%,rgba(245,177,103,.22),transparent 28%),
