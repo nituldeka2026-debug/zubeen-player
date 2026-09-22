@@ -1,0 +1,10 @@
+[
+  {
+    "id": "p1",
+    "name": "Test Program",
+    "query": "Zubeen Garg",
+    "start": "00:00",
+    "end": "23:59",
+    "enabled": true
+  }
+]
