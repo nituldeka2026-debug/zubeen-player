@@ -1,6 +1,6 @@
 {
   "name": "zubeen-radio-player",
-  "version": "4.0.0",
+  "version": "7.0.0",
   "private": true,
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=18" }

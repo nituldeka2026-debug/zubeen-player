@@ -1,9 +1,12 @@
 {
-  "name": "Zubeen Radio",
-  "short_name": "Zubeen Radio",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#0b0807",
-  "theme_color": "#0b0807",
-  "description": "Zubeen Radio — live Assamese music station"
+  "name":"Zubeen Radio",
+  "short_name":"Zubeen Radio",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "orientation":"portrait",
+  "background_color":"#0b0807",
+  "theme_color":"#0b0807",
+  "description":"Zubeen Radio — live Assamese music station",
+  "icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
