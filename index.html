@@ -55,9 +55,27 @@
     </div>
   </section>
   <div id="notice" class="notice">Radio loading…</div>
-  <!-- Lower history / schedule / about panels removed for a cleaner 4.3 layout. -->
+
+  <section class="show-schedule-grid" aria-label="Current show and today's schedule">
+    <article class="current-show-card glass-card">
+      <div class="card-label">🎧 CURRENT SHOW</div>
+      <div class="current-show-inner">
+        <div class="mini-portrait" id="showPortrait">ZG</div>
+        <div>
+          <h3 id="currentShowLarge">Evening Memories</h3>
+          <div class="show-time" id="currentShowTime">17:00 – 22:00</div>
+          <p id="currentShowDesc">Zubeen Garg songs, memories and melodies.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="today-card glass-card">
+      <div class="card-label">🕐 TODAY'S SCHEDULE</div>
+      <div id="scheduleCards" class="schedule-cards"></div>
+    </article>
+  </section>
 
 </main>
-<footer>ZUBEEN RADIO • 24/7 LIVE STATION • SAME SONG • SAME SECOND • GUWAHATI CLOCK</footer>
+<footer>〽 ZUBEEN RADIO • FIVE ROTATIONS A DAY • SET BY THE CLOCK IN GUWAHATI • THE STATION IS FREE AND STAYS FREE</footer>
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});</script><script src="/app.js"></script>
 </body></html>
