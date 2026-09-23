@@ -1,10 +1,42 @@
 [
   {
-    "id": "p1",
-    "name": "Test Program",
-    "query": "Zubeen Garg",
-    "start": "00:00",
-    "end": "23:59",
+    "id": "program-1",
+    "name": "Prabhat Zubeen",
+    "query": "Zubeen Garg Assamese morning borgeet lokgeet bhakti songs",
+    "start": "05:00",
+    "end": "09:00",
+    "enabled": true
+  },
+  {
+    "id": "program-2",
+    "name": "Zubeen Gold",
+    "query": "Zubeen Garg classic Assamese popular songs",
+    "start": "09:00",
+    "end": "13:00",
+    "enabled": true
+  },
+  {
+    "id": "program-3",
+    "name": "Afternoon Zubeen",
+    "query": "Zubeen Garg Assamese songs afternoon",
+    "start": "13:00",
+    "end": "17:00",
+    "enabled": true
+  },
+  {
+    "id": "program-4",
+    "name": "Evening Memories",
+    "query": "Zubeen Garg Assamese romantic emotional songs",
+    "start": "17:00",
+    "end": "22:00",
+    "enabled": true
+  },
+  {
+    "id": "program-5",
+    "name": "Midnight Zubeen",
+    "query": "Zubeen Garg soulful midnight Assamese songs",
+    "start": "22:00",
+    "end": "05:00",
     "enabled": true
   }
 ]
