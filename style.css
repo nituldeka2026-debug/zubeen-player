@@ -620,3 +620,11 @@ footer{position:relative;z-index:3;border-top:0;color:#bfa99f;padding:14px 5vw 2
 @media(max-width:560px){
   .bg{background-position:62% center;background-size:auto 100%;background-color:#160e0b}
 }
+
+/* 1–7 UPDATE: player portrait, connection state and responsive polish.
+   Existing Zubeen Radio layout is intentionally preserved. */
+.art-stage .cover{opacity:.34!important;background-blend-mode:screen;background-color:rgba(30,12,8,.58);filter:saturate(.92) contrast(1.03)}
+.art-stage .cover.has{opacity:.34!important}
+.art-stage .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.48));pointer-events:none}
+.notice{transition:color .2s,opacity .2s}
+@media(max-width:600px){.art-stage .cover{opacity:.40!important}.art-vignette{background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.62))}.actions button,.actions a{min-height:38px}}
