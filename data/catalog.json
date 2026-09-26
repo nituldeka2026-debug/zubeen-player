@@ -31,5 +31,18 @@
     "thumbnail": "https://i.ytimg.com/vi/JMj0StLwyRc/hqdefault.jpg",
     "enabled": true,
     "source": "fallback"
+  },
+  {
+    "id": "3946e5a0-aec7-4781-a4a4-8801866a0fe0",
+    "title": "Test Song",
+    "artist": "Zubeen Garg",
+    "year": "—",
+    "category": "Zubeen Classics",
+    "youtubeId": "TEST123",
+    "audioUrl": "",
+    "thumbnail": "",
+    "duration": 0,
+    "enabled": true,
+    "source": "admin"
   }
 ]
