@@ -36,17 +36,22 @@
     <div class="player-grid">
       <div class="art-stage">
         <div id="yt"></div><audio id="radioAudio" preload="none" playsinline></audio>
-        <div id="cover" class="cover">ZG</div>
+        <div id="cover" class="cover" aria-hidden="true">ZG</div>
+        <div class="radio-portrait-wrap">
+          <div class="radio-portrait"><span>ZUBEEN</span></div>
+          <div class="portrait-live">● LIVE</div>
+          <div class="portrait-onair">ON AIR</div>
+          <div class="portrait-wave" aria-hidden="true">▁▃▆▃▇▅▃▆▁</div>
+        </div>
         <div class="art-vignette"></div>
-        <div class="art-badge">LIVE RADIO</div>
+        <div class="art-badge">24/7 • ZUBEEN RADIO</div>
       </div>
       <div class="now-card">
         <div class="eyebrow">NOW PLAYING</div>
         <h1 id="title">Loading song…</h1>
         <p id="artist">Zubeen Garg</p>
         <div id="meta" class="meta">Automatic station • YouTube</div>
-        <div class="timeline"><span id="cur">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="dur">0:00</span></div>
-        <div class="timeline-note">LIVE TIMELINE • SEEKING LOCKED</div>
+        <div class="live-song-note"><span>● LIVE STREAM</span><small>Everyone hears the same timeline</small></div>
         <div class="control-row"><button id="play" class="main-play">▶ TUNE IN</button><div class="wave" id="wave">▂▅▇▃▆▂▇▅</div><label class="volume">VOL <input id="vol" type="range" min="0" max="100" value="85"></label></div>
         <div class="radio-state"><span>● LIVE RADIO</span><b><span id="listeners">1</span> LISTENING</b></div>
         <div class="show-box"><div><small>CURRENT PROGRAM</small><strong id="currentShow">Evening Memories</strong></div><div><small>NEXT PROGRAM</small><strong id="nextShow">Midnight Zubeen</strong></div></div>

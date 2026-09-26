@@ -621,10 +621,21 @@ footer{position:relative;z-index:3;border-top:0;color:#bfa99f;padding:14px 5vw 2
   .bg{background-position:62% center;background-size:auto 100%;background-color:#160e0b}
 }
 
-/* 1–7 UPDATE: player portrait, connection state and responsive polish.
-   Existing Zubeen Radio layout is intentionally preserved. */
-.art-stage .cover{opacity:.34!important;background-blend-mode:screen;background-color:rgba(30,12,8,.58);filter:saturate(.92) contrast(1.03)}
-.art-stage .cover.has{opacity:.34!important}
-.art-stage .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.48));pointer-events:none}
-.notice{transition:color .2s,opacity .2s}
-@media(max-width:600px){.art-stage .cover{opacity:.40!important}.art-vignette{background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.62))}.actions button,.actions a{min-height:38px}}
+/* LIVE RADIO PLAYER — single shared stream presentation */
+.radio-portrait-wrap{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.radio-portrait{width:210px;height:210px;border-radius:50%;border:2px solid rgba(255,177,61,.92);background-image:linear-gradient(180deg,rgba(8,5,4,.04),rgba(8,5,4,.48)),url('/assets/zubeen-bg.jpg');background-size:cover;background-position:center 22%;box-shadow:0 0 0 7px rgba(255,169,41,.08),0 0 42px rgba(255,155,22,.28),0 25px 55px rgba(0,0,0,.5);position:relative;overflow:hidden}
+.radio-portrait:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 30%,transparent 35%,rgba(0,0,0,.36) 100%)}
+.radio-portrait span{position:absolute;left:0;right:0;bottom:18px;text-align:center;font:500 8px 'DM Mono';letter-spacing:4px;color:rgba(255,255,255,.78);z-index:2}
+.portrait-live{margin-top:12px;padding:7px 12px;border-radius:18px;background:#e93227;color:#fff;font:600 7px 'DM Mono';letter-spacing:1px;box-shadow:0 6px 20px rgba(233,50,39,.25)}
+.portrait-onair{margin-top:10px;color:#ffb52f;font:500 7px 'DM Mono';letter-spacing:2px}
+.portrait-wave{margin-top:12px;color:#ffb52f;font-size:16px;letter-spacing:3px;opacity:.9;text-shadow:0 0 15px rgba(255,173,35,.5)}
+.live-song-note{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:10px 0;border-top:1px solid rgba(255,255,255,.08);font-size:7px;color:#ffb52f}
+.live-song-note small{font-size:6px;color:#9e8c84}
+.now-card .timeline,.now-card .timeline-note{display:none!important}
+.now-card .show-box{display:none}
+.main-play{min-width:120px!important;border:1px solid rgba(255,180,45,.7)!important;background:#ffad22!important;color:#1b0d05!important;border-radius:28px!important;padding:13px 20px!important;box-shadow:0 8px 26px rgba(255,159,10,.2)!important}
+.volume input{accent-color:#ffad22}
+.wave{color:#ffb52f!important}
+.wave.live{animation:pulse .7s infinite alternate}
+@media(max-width:900px){.radio-portrait{width:190px;height:190px}.art-stage{min-height:300px!important;height:360px!important}.now-card{text-align:center}.live-song-note{margin-top:15px}.control-row{justify-content:center;flex-wrap:wrap}.volume{margin-left:8px}.wave{margin-left:8px!important}}
+@media(max-width:600px){.radio-portrait{width:155px;height:155px}.art-stage{height:310px!important;min-height:310px!important}.portrait-live{margin-top:9px;padding:6px 10px}.portrait-onair{margin-top:7px}.portrait-wave{margin-top:8px;font-size:13px}.live-song-note{display:block;text-align:center}.live-song-note small{display:block;margin-top:6px}.now-card h1{font-size:25px!important}.now-card>p{font-size:9px}.control-row{gap:10px}.main-play{min-width:132px!important}.volume{width:100%;justify-content:center;margin:4px 0 0}.volume input{width:110px}}
