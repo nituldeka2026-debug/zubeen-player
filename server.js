@@ -40,7 +40,11 @@ function json(res,status,data){res.writeHead(status,{'Content-Type':'application
 function body(req){return new Promise((resolve,reject)=>{let b='';req.on('data',c=>{b+=c;if(b.length>2e6) req.destroy()});req.on('end',()=>{try{resolve(b?JSON.parse(b):{})}catch(e){reject(e)}});req.on('error',reject)})}
 function clean(v,n=300){return String(v??'').trim().slice(0,n)}
 function minutes(t){const m=String(t||'00:00').match(/^(\d{1,2}):(\d{2})$/);return m?Math.min(1439,Number(m[1])*60+Number(m[2])):0}
-function rotationForNow(){const m=new Date().getHours()*60+new Date().getMinutes();const p=readSchedule().find(x=>{const s=minutes(x.start),e=minutes(x.end);return s<e?m>=s&&m<e:m>=s||m<e});return p?.name||'Midnight Zubeen'}
+function istMinutes(){
+  const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+  return Number(p.find(x=>x.type==='hour')?.value||0)*60+Number(p.find(x=>x.type==='minute')?.value||0);
+}
+function rotationForNow(){const m=istMinutes();const p=readSchedule().find(x=>{const s=minutes(x.start),e=minutes(x.end);return s<e?m>=s&&m<e:m>=s||m<e});return p?.name||'Midnight Zubeen'}
 function stationKey(category){return category||rotationForNow()}
 function parseDuration(iso){const m=String(iso||'').match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);return m?Number(m[1]||0)*3600+Number(m[2]||0)*60+Number(m[3]||0):0}
 
@@ -66,7 +70,14 @@ async function autoSync(category){
 
 const listeners=new Map(),station=new Map(),history=new Map();
 function pushHistory(category,song,duration){if(!song)return;const k=stationKey(category),list=history.get(k)||[];list.unshift({...song,duration:Number(duration||song.duration||0),playedAt:Date.now()});history.set(k,list.slice(0,50))}
-function pickNextSong(category,items,currentId){const recent=(history.get(stationKey(category))||[]).slice(0,Math.min(20,Math.max(0,items.length-1)));const recentIds=new Set(recent.map(x=>x.id));let candidates=items.filter(x=>x.id!==currentId&&!recentIds.has(x.id));if(!candidates.length)candidates=items.filter(x=>x.id!==currentId);if(!candidates.length)candidates=items;return candidates[Math.floor(Math.random()*candidates.length)]}
+function pickNextSong(category,items,currentId){
+  const recent=(history.get(stationKey(category))||[]);
+  const recentIds=new Set(recent.slice(0,Math.min(20,Math.max(0,items.length-1))).map(x=>x.id));
+  let candidates=items.filter(x=>x.id!==currentId&&!recentIds.has(x.id));
+  if(!candidates.length)candidates=items.filter(x=>x.id!==currentId);
+  if(!candidates.length)candidates=items;
+  return candidates[Math.floor(Math.random()*candidates.length)];
+}
 function stationItems(category){return readCatalog().filter(s=>s.enabled!==false&&s.category===stationKey(category)&&(s.youtubeId||s.audioUrl))}
 function getStation(category,items){const key=stationKey(category);items=items||stationItems(key);let st=station.get(key);if(!st||!items.some(x=>x.id===st.songId)){const first=items[0];st={songId:first?.id||null,startedAt:Date.now(),revision:1,duration:Number(first?.duration||0)};station.set(key,st);if(first)pushHistory(key,first,st.duration)}let song=items.find(x=>x.id===st.songId)||items[0];if(song&&song.id!==st.songId){st.songId=song.id;st.startedAt=Date.now();st.revision++;st.duration=Number(song.duration||0)}if(song&&!st.duration&&song.duration)st.duration=Number(song.duration);let elapsed=Math.max(0,(Date.now()-st.startedAt)/1000);if(song&&st.duration>0&&elapsed>=st.duration+0.25&&items.length>1){const next=pickNextSong(key,items,song.id);st={songId:next.id,startedAt:Date.now(),revision:(st.revision||0)+1,duration:Number(next.duration||0)};station.set(key,st);pushHistory(key,next,st.duration);song=next;elapsed=0}return{category:key,song,startedAt:st.startedAt,serverNow:Date.now(),position:elapsed,duration:Number(st.duration||song?.duration||0),revision:st.revision}}
 function setStationDuration(category,songId,duration){const key=stationKey(category),st=station.get(key),sec=Math.floor(Number(duration)||0);if(!st||st.songId!==songId||sec<1)return null;st.duration=sec;station.set(key,st);return getStation(key,stationItems(key))}
@@ -85,7 +96,15 @@ const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,`htt
  if(req.method==='GET'&&u.pathname==='/api/youtube/search'){const q=clean(u.searchParams.get('q'),180);if(!q)return json(res,200,{items:[]});if(!API_KEY)return json(res,503,{error:'YOUTUBE_API_KEY is not configured on Render.'});return json(res,200,{items:await youtubeSearch(q)})}
  if(req.method==='GET'&&u.pathname==='/api/radio/history'){const cat=clean(u.searchParams.get('category'),100)||rotationForNow();return json(res,200,{items:(history.get(cat)||[]).slice(0,50)})}
  if(req.method==='GET'&&u.pathname==='/api/radio/state'){const cat=clean(u.searchParams.get('category'),100)||rotationForNow(),items=stationItems(cat);if(!items.length)return json(res,404,{error:'No playable songs in this rotation'});return json(res,200,getStation(cat,items))}
- if(req.method==='POST'&&u.pathname==='/api/radio/report-duration'){const b=await body(req),state=setStationDuration(clean(b.category,100)||rotationForNow(),clean(b.songId,200),b.duration);return state?json(res,200,state):json(res,409,{error:'Station state changed; duration ignored'})}
+ if(req.method==='POST'&&u.pathname==='/api/radio/advance'){
+    const b=await body(req),category=clean(b.category,100)||rotationForNow(),items=stationItems(category);
+    if(!items.length)return json(res,404,{error:'No playable songs'});
+    const current=getStation(category,items);
+    if(b.songId&&current.song.id!==b.songId)return json(res,200,current);
+    const next=advanceStation(category);
+    return next?json(res,200,next):json(res,404,{error:'Unable to advance'});
+  }
+  if(req.method==='POST'&&u.pathname==='/api/radio/report-duration'){const b=await body(req),state=setStationDuration(clean(b.category,100)||rotationForNow(),clean(b.songId,200),b.duration);return state?json(res,200,state):json(res,409,{error:'Station state changed; duration ignored'})}
  if(req.method==='GET'&&u.pathname==='/api/radio/health'){const cat=clean(u.searchParams.get('category'),100)||rotationForNow(),items=stationItems(cat);return json(res,200,{ok:true,category:cat,playableSongs:items.length,online:true})}
  if(req.method==='GET'&&u.pathname==='/api/admin/songs')return json(res,200,{items:readCatalog()});
  if(req.method==='POST'&&u.pathname==='/api/admin/songs'){if(!adminOK(req))return json(res,401,{error:'Admin key required'});const b=await body(req),title=clean(b.title,180),youtubeId=clean(b.youtubeId,40),audioUrl=clean(b.audioUrl,1000);if(!title||(!youtubeId&&!audioUrl))return json(res,400,{error:'title and youtubeId/audioUrl required'});const catalog=readCatalog();if(youtubeId&&catalog.some(s=>s.youtubeId===youtubeId))return json(res,409,{error:'Already in catalog'});const song={id:crypto.randomUUID(),title,artist:clean(b.artist,120)||'Zubeen Garg',year:clean(b.year,20)||'—',category:clean(b.category,100)||'Zubeen Classics',youtubeId,audioUrl,thumbnail:clean(b.thumbnail,500),duration:Number(b.duration)||0,enabled:b.enabled!==false,source:'admin'};catalog.push(song);writeCatalog(catalog);return json(res,200,{song})}
@@ -95,6 +114,6 @@ const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,`htt
  if(req.method==='GET'&&u.pathname==='/api/schedule')return json(res,200,{items:readSchedule()});
  if(req.method==='PUT'&&u.pathname==='/api/admin/schedule'){if(!adminOK(req))return json(res,401,{error:'Admin key required'});const b=await body(req),items=Array.isArray(b.items)?b.items.map((x,i)=>({id:clean(x.id,80)||`program-${i+1}`,name:clean(x.name,100),query:clean(x.query,200),start:clean(x.start,5),end:clean(x.end,5),enabled:x.enabled!==false})).filter(x=>x.name):null;if(!items?.length)return json(res,400,{error:'At least one program is required'});writeSchedule(items);return json(res,200,{items})}
  if(req.method==='POST'&&u.pathname==='/api/admin/rotate'){if(!adminOK(req))return json(res,401,{error:'Admin key required'});const b=await body(req),state=advanceStation(clean(b.category,100)||rotationForNow());return state?json(res,200,state):json(res,404,{error:'No songs'})}
- let file=safeFile(u.pathname);if(!fs.existsSync(file)||fs.statSync(file).isDirectory())file=path.join(ROOT,'index.html');const ext=path.extname(file).toLowerCase();res.writeHead(200,{'Content-Type':mime[ext]||'application/octet-stream'});fs.createReadStream(file).pipe(res);
+ let file=safeFile(u.pathname);if(!fs.existsSync(file)||fs.statSync(file).isDirectory())file=path.join(ROOT,'index.html');const ext=path.extname(file).toLowerCase();const headers={'Content-Type':mime[ext]||'application/octet-stream'};if(['.html','.js','.css','.json','.webmanifest'].includes(ext)||path.basename(file)==='sw.js')headers['Cache-Control']='no-store, no-cache, must-revalidate';res.writeHead(200,headers);fs.createReadStream(file).pipe(res);
  }catch(e){console.error(e);json(res,500,{error:e.message||'Server error'})}});
 ensureData();server.listen(PORT,()=>console.log(`Zubeen Radio listening on ${PORT} | YouTube API: ${API_KEY?'ON':'OFF'} | Admin key: ${ADMIN_KEY?'ON':'OFF'}`));

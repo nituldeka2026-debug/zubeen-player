@@ -628,3 +628,34 @@ footer{position:relative;z-index:3;border-top:0;color:#bfa99f;padding:14px 5vw 2
 .art-stage .cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.48));pointer-events:none}
 .notice{transition:color .2s,opacity .2s}
 @media(max-width:600px){.art-stage .cover{opacity:.40!important}.art-vignette{background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.62))}.actions button,.actions a{min-height:38px}}
+
+/* v12 player-background fix: keep the Zubeen artwork visible behind the live player */
+.art-stage{
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,rgba(5,3,3,.18),rgba(5,3,3,.58)),
+    url('/assets/zubeen-bg-wide.jpg') center 34%/cover no-repeat;
+}
+.art-stage::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(0,0,0,.10),rgba(0,0,0,.34));
+  pointer-events:none;
+  z-index:0;
+}
+.art-stage > *{position:relative;z-index:1}
+.art-stage .cover{
+  background-color:rgba(30,12,8,.22)!important;
+  background-blend-mode:screen;
+  opacity:.22!important;
+  box-shadow:none;
+}
+.art-stage .cover.has{opacity:.22!important}
+@media(max-width:600px){
+  .art-stage{
+    background-position:center 30%;
+  }
+  .art-stage .cover,.art-stage .cover.has{opacity:.28!important}
+}

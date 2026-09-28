@@ -29,3 +29,12 @@ Node: 18+
 ## Background playback
 
 This build supports true mobile background playback when a song has a direct `audioUrl` (MP3/M4A/AAC/OGG/WAV). It uses the native HTML audio element and Media Session API for lock-screen/headset controls. YouTube iframe playback remains subject to mobile browser/YouTube background-playback restrictions. Add direct audio URLs through the admin song form for reliable background playback.
+
+
+## v12 fixes
+- All schedule calculations use Asia/Kolkata (IST), both server and browser.
+- Song-end now explicitly advances the shared station and starts the next track automatically.
+- Schedule transition triggers catalogue sync for the new programme.
+- No-repeat rotation keeps recent songs out of the next pick when alternatives exist.
+- Player artwork keeps the Zubeen background visible behind the cover.
+- Service-worker/static assets use a bumped cache version and no-cache headers for HTML/JS/CSS.
