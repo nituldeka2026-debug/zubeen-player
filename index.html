@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="as">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="application-name" content="Zubeen Radio">
 <meta name="theme-color" content="#0b0807"><title>Zubeen Radio — Live</title>
 <link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Noto+Serif+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
@@ -50,7 +51,7 @@
         <div class="control-row"><button id="play" class="main-play">▶ TUNE IN</button><div class="wave" id="wave">▂▅▇▃▆▂▇▅</div><label class="volume">VOL <input id="vol" type="range" min="0" max="100" value="85"></label></div>
         <div class="radio-state"><span>● LIVE RADIO</span><b><span id="listeners">1</span> LISTENING</b></div>
         <div class="show-box"><div><small>CURRENT PROGRAM</small><strong id="currentShow">Evening Memories</strong></div><div><small>NEXT PROGRAM</small><strong id="nextShow">Midnight Zubeen</strong></div></div>
-        <div class="actions"><button id="bgBtn">◒ BACKGROUND</button><button id="installBtn" class="hide">＋ INSTALL APP</button><button id="screenBtn">▣ SCREEN ON</button><a href="https://open.spotify.com/search/Zubeen%20Garg" target="_blank" rel="noreferrer">SPOTIFY ↗</a><a href="https://music.youtube.com/search?q=Zubeen%20Garg" target="_blank" rel="noreferrer">YT MUSIC ↗</a></div>
+        <div class="actions"><button id="bgBtn">◒ BACKGROUND</button><button id="installBtn" class="install-app-btn">＋ INSTALL APP</button><button id="screenBtn">▣ SCREEN ON</button><a href="https://open.spotify.com/search/Zubeen%20Garg" target="_blank" rel="noreferrer">SPOTIFY ↗</a><a href="https://music.youtube.com/search?q=Zubeen%20Garg" target="_blank" rel="noreferrer">YT MUSIC ↗</a></div>
       </div>
     </div>
   </section>
@@ -77,5 +78,7 @@
 
 </main>
 <footer>〽 ZUBEEN RADIO • FIVE ROTATIONS A DAY • SET BY THE CLOCK IN GUWAHATI • THE STATION IS FREE AND STAYS FREE</footer>
-<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});</script><script src="/app.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(r=>r.update()).catch(()=>{});}</script><script src="/app.js"></script>
+<!-- ZUBEEN_RADIO_TUNE_GATE_V4 -->
+<script>document.getElementById('tune')?.classList.remove('hide');</script>
 </body></html>

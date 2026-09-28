@@ -1,4 +1,4 @@
-const CACHE_V9='zubeen-radio-v12-pwa-fix-1';
+const CACHE_V9='zubeen-radio-v12-pwa-mobile-fix-4-tune-gate';
 const APP=['/','/index.html','/style.css','/app.js','/schedule.html','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png','/assets/zubeen-bg.jpg','/assets/zubeen-bg-wide.jpg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE_V9).then(c=>c.addAll(APP)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_V9).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

@@ -659,3 +659,30 @@ footer{position:relative;z-index:3;border-top:0;color:#bfa99f;padding:14px 5vw 2
   }
   .art-stage .cover,.art-stage .cover.has{opacity:.28!important}
 }
+
+.install-app-btn{display:inline-flex!important;align-items:center;justify-content:center;font-weight:500!important;border-color:#a97343!important;color:#f0d0a5!important;background:#241711!important;min-height:32px}.install-app-btn.hide{display:none!important}@media(max-width:560px){.actions{gap:8px}.install-app-btn{font-size:7px!important;padding:9px 12px!important;min-height:36px}}
+
+/* v12.3 YouTube video visibility fix */
+.art-stage #yt{opacity:.82!important;z-index:1!important;pointer-events:auto!important;}
+.art-stage #yt iframe{opacity:1!important;visibility:visible!important;}
+.art-stage .cover{z-index:2!important;opacity:.18!important;pointer-events:none!important;}
+.art-stage .cover.has{opacity:.18!important;}
+@media(max-width:700px){.art-stage #yt{opacity:.82!important;visibility:visible!important;display:block!important;pointer-events:auto!important;} .art-stage #yt iframe{visibility:visible!important;opacity:1!important;} .art-stage .cover,.art-stage .cover.has{opacity:.14!important;}}
+
+/* v12.5 MOBILE PLAYER FIT FIX */
+html,body{width:100%;max-width:100%;overflow-x:hidden;}
+@media(max-width:700px){
+  main{width:calc(100% - 16px)!important;max-width:100%!important;margin-left:auto!important;margin-right:auto!important;}
+  .live-panel{width:100%!important;max-width:100%!important;overflow:hidden!important;}
+  .player-grid{display:grid!important;grid-template-columns:1fr!important;width:100%!important;min-width:0!important;}
+  .art-stage{width:100%!important;max-width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:16/9!important;border:0!important;overflow:hidden!important;}
+  .art-stage #yt,.art-stage #yt iframe{width:100%!important;max-width:100%!important;height:100%!important;min-width:0!important;}
+  .art-stage .cover,.art-stage .cover.has{inset:0!important;max-width:100%!important;}
+  .now-card{width:100%!important;min-width:0!important;max-width:100%!important;overflow:hidden!important;}
+  .now-card h1,.now-card p,.meta{max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .actions{width:100%!important;max-width:100%!important;flex-wrap:wrap!important;}
+}
+@media(max-width:380px){
+  main{width:calc(100% - 12px)!important;}
+  .art-stage{aspect-ratio:16/9!important;}
+}
