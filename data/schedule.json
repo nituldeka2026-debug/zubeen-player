@@ -2,7 +2,7 @@
   {
     "id": "program-1",
     "name": "Prabhat Zubeen",
-    "query": "Zubeen Garg Assamese morning borgeet lokgeet bhakti songs",
+    "query": "Zubeen Garg Assamese Hindi Bengali Nepali devotional morning songs",
     "start": "05:00",
     "end": "09:00",
     "enabled": true
@@ -10,7 +10,7 @@
   {
     "id": "program-2",
     "name": "Zubeen Gold",
-    "query": "Zubeen Garg classic Assamese popular songs",
+    "query": "Zubeen Garg classic hit songs Assamese Hindi Bengali Nepali",
     "start": "09:00",
     "end": "13:00",
     "enabled": true
@@ -18,7 +18,7 @@
   {
     "id": "program-3",
     "name": "Afternoon Zubeen",
-    "query": "Zubeen Garg Assamese songs afternoon",
+    "query": "Zubeen Garg Assamese Hindi Bengali Nepali Bodo songs",
     "start": "13:00",
     "end": "17:00",
     "enabled": true
@@ -26,7 +26,7 @@
   {
     "id": "program-4",
     "name": "Evening Memories",
-    "query": "Zubeen Garg Assamese romantic emotional songs",
+    "query": "Zubeen Garg romantic songs Assamese Hindi Bengali Nepali",
     "start": "17:00",
     "end": "22:00",
     "enabled": true
@@ -34,7 +34,7 @@
   {
     "id": "program-5",
     "name": "Midnight Zubeen",
-    "query": "Zubeen Garg soulful midnight Assamese songs",
+    "query": "Zubeen Garg soulful songs Assamese Hindi Bengali Nepali",
     "start": "22:00",
     "end": "05:00",
     "enabled": true
