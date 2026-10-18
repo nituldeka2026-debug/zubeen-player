@@ -50,3 +50,10 @@
 - Radio station state আৰু history এতিয়াও process memory-ত থাকে; server restart-ৰ পিছত সেই data স্থায়ীভাৱে নাথাকে।
 - `ADMIN_KEY` configure নকৰিলে admin panel-ৰ management feature বন্ধ থাকিব। Live deploy কৰাৰ আগতে environment-ত দীঘলীয়া random secret set কৰিব লাগিব।
 - Live deployment কৰা হোৱা নাই।
+
+
+9. **Multilingual Zubeen song discovery (new)**
+   - Program search queries-ত অসমীয়া, হিন্দী, বাংলা, নেপালী আৰু বড়ো ভাষাৰ গানৰ সন্ধান অন্তৰ্ভুক্ত কৰা হৈছে।
+   - `YOUTUBE_API_KEY` থাকিলে প্ৰতিটো program-এ sync-ত সৰ্বাধিক ২৪টা নতুন distinct result যোগ কৰাৰ চেষ্টা কৰে; প্ৰতি program-ত ৬ ঘণ্টাৰ retry interval আৰু ৩০টা গানৰ target আছে।
+   - YouTube search-এ সীমিত ফলাফলহে দিয়ে; সেয়ে এইটো “জুবিন দাৰ প্ৰতিটো গান নিশ্চিতভাৱে আছে” বুলি guarantee নহয়।
+   - API key নাথাকিলে auto-discovery নহয়; fallback/নিজে যোগ কৰা গানহে উপলব্ধ থাকে।

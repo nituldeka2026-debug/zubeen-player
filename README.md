@@ -38,3 +38,10 @@ This build supports true mobile background playback when a song has a direct `au
 - No-repeat rotation keeps recent songs out of the next pick when alternatives exist.
 - Player artwork keeps the Zubeen background visible behind the cover.
 - Service-worker/static assets use a bumped cache version and no-cache headers for HTML/JS/CSS.
+
+
+## Multilingual catalogue discovery
+- Program searches now include Assamese, Hindi, Bengali, Nepali and Bodo recordings associated with Zubeen Garg.
+- When `YOUTUBE_API_KEY` is configured, each program can discover up to 24 new distinct results per sync attempt, with a six-hour retry interval and a target of 30 tracks per program.
+- Discovery is progressive, not an exhaustive guarantee: YouTube search only returns a limited set of public, embeddable results, and some recordings may be unavailable or mislabeled.
+- Keep `YOUTUBE_API_KEY` configured in Render for catalogue expansion. Without it, the app can only use the local fallback catalogue and manually added tracks.

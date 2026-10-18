@@ -58,14 +58,61 @@ async function youtubeSearch(q){
   const vr=await fetch(v),vd=await vr.json();if(!vr.ok)throw new Error(vd.error?.message||'YouTube API details failed');
   return (vd.items||[]).filter(x=>x.status?.privacyStatus==='public'&&x.status?.embeddable!==false).map(x=>({id:x.id,title:x.snippet?.title||'Zubeen Garg',artist:x.snippet?.channelTitle||'Zubeen Garg',year:(x.snippet?.publishedAt||'').slice(0,4)||'—',duration:parseDuration(x.contentDetails?.duration),thumbnail:x.snippet?.thumbnails?.high?.url||x.snippet?.thumbnails?.medium?.url||`https://i.ytimg.com/vi/${x.id}/hqdefault.jpg`}));
 }
+const syncAttemptAt = new Map();
+const SYNC_TARGET_PER_PROGRAM = 60;
+const SYNC_RETRY_MS = 6 * 60 * 60 * 1000;
+
+// A targeted non-Assamese query is assigned to each program so the catalogue
+// does not stop searching merely because it already contains many Assamese songs.
+const MULTILINGUAL_QUERIES = {
+  'Prabhat — Zubeen Morning': 'Zubeen Garg Hindi songs',
+  'Bihu Beats': 'Zubeen Garg Bengali songs',
+  'Zubeen Classics': 'Zubeen Garg Nepali songs',
+  'Evening Memories': 'Zubeen Garg Hindi Bengali songs',
+  'Midnight Zubeen': 'Zubeen Garg Bodo Nepali songs'
+};
+
 async function autoSync(category){
-  let catalog=readCatalog(), current=catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl));
-  if(current.length>=8)return{items:current,added:0,api:false};
-  const p=readSchedule().find(x=>x.name===category),q=p?.query||category;
-  if(API_KEY){try{const results=await youtubeSearch(q);const ids=new Set(catalog.map(s=>s.youtubeId).filter(Boolean));const selected=results.filter(x=>!ids.has(x.id)).filter(x=>/zubeen|জুবিন/i.test(`${x.title} ${x.artist}`)).slice(0,12);for(const x of selected){catalog.push({id:crypto.randomUUID(),title:x.title,artist:x.artist,year:x.year,category,youtubeId:x.id,duration:x.duration||0,thumbnail:x.thumbnail,enabled:true,source:'youtube-api'});ids.add(x.id)}if(selected.length)writeCatalog(catalog);current=catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl));if(current.length)return{items:current,added:selected.length,api:true}}catch(e){console.error('YouTube sync:',e.message)}}
+  let catalog=readCatalog();
+  let current=catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl));
+  const now=Date.now(), last=syncAttemptAt.get(category)||0;
+  const targetedCount=current.filter(s=>s.discoveryQuery).length;
+  // Keep looking until the catalogue has a healthy size and has received targeted
+  // language searches. This fixes the old >=30-song early return that could leave
+  // a catalogue containing only Assamese results forever.
+  if(API_KEY && (current.length<SYNC_TARGET_PER_PROGRAM || targetedCount<10) && now-last>=SYNC_RETRY_MS){
+    syncAttemptAt.set(category,now);
+    const p=readSchedule().find(x=>x.name===category);
+    const queries=[p?.query||category, MULTILINGUAL_QUERIES[category]||'Zubeen Garg Hindi Bengali Nepali songs'];
+    try{
+      const found=[];
+      for(const q of [...new Set(queries)]){
+        try{
+          const results=await youtubeSearch(q);
+          for(const item of results)found.push({...item,discoveryQuery:q});
+        }catch(e){console.error('YouTube search:',e.message)}
+      }
+      const ids=new Set(catalog.map(s=>s.youtubeId).filter(Boolean));
+      const selected=[];
+      for(const x of found){
+        if(!x.id||ids.has(x.id))continue;
+        // Keep results connected to Zubeen Garg; search query itself targets the artist.
+        if(!/zubeen|জুবিন/i.test(`${x.title} ${x.artist}`))continue;
+        ids.add(x.id);selected.push(x);
+        if(selected.length>=24)break;
+      }
+      for(const x of selected){
+        catalog.push({id:crypto.randomUUID(),title:x.title,artist:x.artist,year:x.year,category,youtubeId:x.id,duration:x.duration||0,thumbnail:x.thumbnail,enabled:true,source:'youtube-api',discoveryQuery:x.discoveryQuery});
+      }
+      if(selected.length)writeCatalog(catalog);
+      current=catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl));
+      if(current.length)return{items:current,added:selected.length,api:true,discovery:'multilingual'};
+    }catch(e){console.error('YouTube sync:',e.message)}
+  }
   const existingIds=new Set(catalog.filter(s=>s.category===category).map(s=>s.youtubeId).filter(Boolean));
   for(const f of FALLBACKS){if(!existingIds.has(f.youtubeId)){catalog.push({...f,id:crypto.randomUUID(),category,source:'fallback'});existingIds.add(f.youtubeId)}}
-  writeCatalog(catalog);return{items:catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl)),added:0,api:false};
+  writeCatalog(catalog);
+  return{items:catalog.filter(s=>s.enabled!==false&&s.category===category&&(s.youtubeId||s.audioUrl)),added:0,api:false,discovery:API_KEY?'waiting-for-next-sync':'api-key-required'};
 }
 
 const listeners=new Map(),station=new Map(),history=new Map();
