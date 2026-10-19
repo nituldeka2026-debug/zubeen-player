@@ -57,3 +57,10 @@
    - `YOUTUBE_API_KEY` থাকিলে প্ৰতিটো program-এ sync-ত সৰ্বাধিক ২৪টা নতুন distinct result যোগ কৰাৰ চেষ্টা কৰে; প্ৰতি program-ত ৬ ঘণ্টাৰ retry interval আৰু ৩০টা গানৰ target আছে।
    - YouTube search-এ সীমিত ফলাফলহে দিয়ে; সেয়ে এইটো “জুবিন দাৰ প্ৰতিটো গান নিশ্চিতভাৱে আছে” বুলি guarantee নহয়।
    - API key নাথাকিলে auto-discovery নহয়; fallback/নিজে যোগ কৰা গানহে উপলব্ধ থাকে।
+
+10. **Auto-next recovery (new)**
+   - Watchdog-এ YouTube player state `ENDED` আৰু শেষৰ সময়ত পৌঁছোৱা playback দুয়োটা পৰীক্ষা কৰে; `playing` flag আগতে false হৈ গ'লেও ended detection বন্ধ নহয়।
+   - YouTube IFrame API unavailable হ'লে direct iframe fallback-ত `postMessage` state/error subscription যোগ কৰা হৈছে, যাতে ended/error event পালে next-song request কৰিব পাৰে।
+   - Advance request-ত 8-second timeout, expected song ID check আৰু per-song duplicate guard যোগ কৰা হৈছে।
+   - Listener-এ Tune In কৰাৰ পিছত shared station-ত আন device-এ গান advance কৰিলে নতুন গান auto-play কৰাৰ intent সংৰক্ষণ কৰা হৈছে; local pause কৰিলে সেই listener-ৰ playback বন্ধেই থাকে।
+   - এইবোৰ local code-level fix; real YouTube playback আৰু device-specific autoplay behavior live deploy-ৰ পিছত পৃথকভাৱে পৰীক্ষা কৰিব লাগিব।
